@@ -32,8 +32,13 @@ Hay varias formas, explico una aprovechando que tienes acceso a este repositorio
 Para cambiar de rama basta con hacer `git chekout nombre-rama`, por ejemplo `git chekout main`. 
 Otro comando útil es `git status`.
 
-3. Añadir y commitear los cambios que hayas realizado (esto es como siempre, `git add .` `git commit`).  
+3. Añadir,commitear y subir los cambios que hayas realizado (esto es como siempre, `git add .` `git commit`) a la rama en que te encuentres.  
+4. Desde el navegardor, debajo del nombre del repositorio tienes las opciones de pull-request desde rama.  
 
+Más información sobre los pull-request:
+https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request
+
+(Otra opción sería que tuvieras un fork del repositorio)  
 
 
 
