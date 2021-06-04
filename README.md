@@ -31,6 +31,7 @@ Hay varias formas, explico una aprovechando que tienes acceso a este repositorio
 
 Para cambiar de rama basta con hacer `git chekout nombre-rama`, por ejemplo `git chekout main`. 
 Otro comando útil es `git status`.
+Para borrar rama local `git branch -d nombre-rama`, rama remota `git branch -D nombre-rama`.
 
 3. Añadir,commitear y subir los cambios que hayas realizado (esto es como siempre, `git add .` `git commit`) a la rama en que te encuentres.  
 4. Desde el navegardor, debajo del nombre del repositorio tienes las opciones de pull-request desde rama.  
