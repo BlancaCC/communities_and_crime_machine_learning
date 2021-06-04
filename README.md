@@ -17,7 +17,7 @@ soy absolutamente repelente porfiiiii :( . Que  esto lo hago pa facilitarnos el 
 
 1. El trabajo realizado no se subirá directamente al repositorio, sino que se actualizará por medio de pull request.  
 2. Las tareas pendientes tendrán asociadas issues.  
-3. Resolver una tarea pendiente es equivalente a cerrar un issue con el commite.  
+3. Resolver una tarea pendiente es equivalente a cerrar un issue con el commit.  
 4. Los commites deberán hacerse atómicos  y de manera periódica, indicando entre `[]` el tema general, por ejemplo 
 `[preprocesado] Tratamiento de datos faltantes, algoritmo de Pepe el cuajao`. 
 
@@ -39,6 +39,22 @@ Más información sobre los pull-request:
 https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request
 
 (Otra opción sería que tuvieras un fork del repositorio)  
+
+
+## Cómo crear issues  
+
+Desde el navegador, en el repositorio, tienes la opción debajo ( a la izquierda de pull-request).  
+Al crearlo se le asocia un número único.  
+Para cerrar un issue desde un commit basta con escribir por algún lado del mensaje `close #123` (si el número de issue era #123, si son varios separa por comas por ejemplo `close #1 , close #2`.  
+
+
+## Cómo descargar contenido   
+
+Utilizar `git rebase nombre-rama`
+No utilizar `git pull`
+
+Más información: https://www.atlassian.com/es/git/tutorials/rewriting-history/git-rebase
+
 
 
 
