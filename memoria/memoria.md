@@ -33,6 +33,18 @@ Las atiquetas aportadas son en total 122 predictivas, 5 no predictivas y una obj
 
 
 
+## Codificación de los datos de entrada  
+
+Para leer los datos nos enfrentamos a dos problemas:
+- Existencia de atributos nominales.  
+- Hay pérdida de datos.  
+
+### Atributos nominales  
+
+Atendiendo a [Attribute Information](#attribute-information), tenemos que los atributos 
+
+
+Categorías: https://www.kdnuggets.com/2021/05/deal-with-categorical-data-machine-learning.html
 
 # Apéndice  
 

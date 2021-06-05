@@ -68,7 +68,7 @@ np.random.seed(1)
 ############# Constantes básicas  ############
 
 NOMBRE_FICHERO  = './datos/communities.data'
-SEPARADOR_REGRESION = ','
+SEPARADOR = ','
 
 NUMERO_CPUS_PARALELO = 4 
 
@@ -104,6 +104,10 @@ def LeerDatos (nombre_fichero, separador):
     x = data[:,:-1].copy()
 
     return x,y
+
+
+x,y = LeerDatos(NOMBRE_FICHERO, SEPARADOR)
+
 
 
 
