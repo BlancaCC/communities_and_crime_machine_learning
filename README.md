@@ -33,7 +33,7 @@ Para cambiar de rama basta con hacer `git chekout nombre-rama`, por ejemplo `git
 Otro comando útil es `git status`.
 Para borrar rama local `git branch -d nombre-rama`, rama remota `git branch -D nombre-rama`.
 
-3. Añadir,commitear y subir los cambios que hayas realizado (esto es como siempre, `git add .` `git commit`) a la rama en que te encuentres.  
+3. Añadir,commitear y subir los cambios que hayas realizado (esto es como siempre, `git add .` `git commit` `git push origin rama`) a la rama en que te encuentres.  
 4. Desde el navegardor, debajo del nombre del repositorio tienes las opciones de pull-request desde rama.  
 
 Más información sobre los pull-request:
@@ -55,6 +55,7 @@ Utilizar `git rebase nombre-rama`
 No utilizar `git pull`
 
 Más información: https://www.atlassian.com/es/git/tutorials/rewriting-history/git-rebase
+
 
 
 
