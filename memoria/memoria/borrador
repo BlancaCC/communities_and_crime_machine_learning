@@ -1,0 +1,16 @@
+
+
+Nosotros utilizaremos la de mínimos cuadrados y la última.   
+
+La mayor ventaja de este método es su eficiencia computacional $\mathcal O(kn\bar p)$  donde $k$ es el número de épocas y $\bar p$ es la media de los atributos no nulos del conjunto,  $n$ es el número de características de la matriz de entrenamiento $X \mathbb R^{n \times p}$.  
+
+
+#### Epsilon-Insensitive  
+
+Esto es un caso de soft-margin equivalente a regresiónd de soporte vectorial donde la función a minimizar es: 
+
+$$L(y_i, f(x_i)) = max(0, |y_i, f(x_i)| - \epsilon)$$
+
+En penalizaciones usaremos l2 porque ya hemos visto que es considerablemente mejor. 
+
+Alphas usaremos también los mejores del apartado ante
