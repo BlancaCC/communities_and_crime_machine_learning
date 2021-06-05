@@ -36,15 +36,20 @@ Las atiquetas aportadas son en total 122 predictivas, 5 no predictivas y una obj
 ## Codificación de los datos de entrada  
 
 Para leer los datos nos enfrentamos a dos problemas:
-- Existencia de atributos nominales.  
+- Existencia de atributos nominales y no predictivos.  
 - Hay pérdida de datos.  
 
-### Atributos nominales  
-
-Atendiendo a [Attribute Information](#attribute-information), tenemos que los atributos 
+### Atributos no predictivos y nominales  
 
 
-Categorías: https://www.kdnuggets.com/2021/05/deal-with-categorical-data-machine-learning.html
+Atendiendo a [Attribute Information](#attribute-information) tenemos que los cinco primeros atributos son no predicctivos, luego los eliminamos directamente.  
+
+El resto de valores son decimales, luego los procesamos sin problema.   
+
+
+<!--Categorías: https://www.kdnuggets.com/2021/05/deal-with-categorical-data-machine-learning.html -->
+
+
 
 # Apéndice  
 

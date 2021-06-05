@@ -19,6 +19,11 @@ import pandas as pd
 # ==========================
 import numpy as np
 
+
+# lectura de datos
+# ==========================
+from pandas import read_csv
+
 # Modelos lineales de clasificación a usar   
 # =========================================
 from sklearn.linear_model import LinearRegression
@@ -99,15 +104,64 @@ def LeerDatos (nombre_fichero, separador):
     y: vector fila de la etiquetas 
     
     '''
-    data = np.genfromtxt(nombre_fichero,delimiter=separador)
-    y = data[:,-1].copy()
-    x = data[:,:-1].copy()
+    datos = np.genfromtxt(nombre_fichero,delimiter=separador)
+    y = datos[:,-1].copy() #cogemos las etiquetas 
+    x = datos[:,5:-1].copy() #obviamos las 5 primeras (no predictoras) y la última (etiquetas)
 
     return x,y
 
+def NoNan(a, media, desviacion_tipica):
+    '''
+    si a == nan entonces devuelve media + random(desviacion_tipica
+    '''
+    if np.isnan(a):
+        extremo = 1.5*desviacion_tipica
+        return media +  np.random.uniform(-extremo, extremo,1)[0]
+
+    else:
+        return a
+
+def TratamientoDatosPerdidos(x, porcentaje_eliminacion = 20):
+    '''
+    INPUT
+    x: atributos
+    porcentaje_eliminacion: a partir de qué porcentaje se eliminan del conjutno de datos
+    OUTPUT x con el siguiemnte criterio de datos perdidos
+    '''
+
+    # umbra datos perdidos para eliminar
+    umbral_perdido = len(x) * porcentaje_eliminacion/100
+   
+    # eliminamos los atributos que tengan más del porcentaje_eliminacion de datso perdidos
+                     
+    x_eliminada = x.T[[ sum(np.isnan(atributo))
+                        < umbral_perdido for atributo in x.T ]]
+
+    
+    
+    # conservamos el resto por criterio de media más valor random
+    for i, atributo in enumerate(x_eliminada):
+        suma = sum(np.isnan(atributo))
+        if (suma  > 0):
+        #calculamos media de los valores que son válido
+            filtrados = atributo[list(map(lambda x: not x, np.isnan(atributo)))]
+            media = filtrados.mean()
+            desviacion_tipica = filtrados.std()
+            
+            
+            x_eliminada[i] =  [NoNan(j, media, desviacion_tipica)
+                               for j in x_eliminada[i]]
+            
+            
+     
+    return x_eliminada
+
+    
 
 x,y = LeerDatos(NOMBRE_FICHERO, SEPARADOR)
 
 
+x = TratamientoDatosPerdidos(x, porcentaje_eliminacion = 20)
 
+print(x_tratada)
 
