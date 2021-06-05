@@ -82,7 +82,7 @@ NUMERO_CPUS_PARALELO = 4
 
 def Parada(mensaje = None):
     '''
-    Hace parada del código y muestra un menaje en tal caso 
+    Hace parada del código y muestra un mensaje en tal caso 
     '''
     print('\n-------- fin apartado, enter para continuar -------\n')
     #input('\n-------- fin apartado, enter para continuar -------\n')
@@ -154,14 +154,93 @@ def TratamientoDatosPerdidos(x, porcentaje_eliminacion = 20):
             
             
      
-    return x_eliminada
+    return x_eliminada.T
 
     
 
 x,y = LeerDatos(NOMBRE_FICHERO, SEPARADOR)
-
-
 x = TratamientoDatosPerdidos(x, porcentaje_eliminacion = 20)
+###### separación test y entrenamiento  #####
+ratio_test_size = 0.2
+x_train, x_test, y_train, y_test = train_test_split(
+    x, y,
+    test_size= ratio_test_size,
+    shuffle = True, 
+    random_state=1)
 
-print(x_tratada)
 
+
+####  Comprobació balanceo de los datos
+
+
+def BalanceadoRegresion(y, divisiones = 20):
+    '''
+    INPUT: 
+    y: Etiquetas
+    divisiones: número de agrupaciones en las que dividir el rango de etiquetas
+
+    OUTPUTS: 
+    void
+    imprime en pantalla detalles y gráfica
+ 
+    '''
+    min_y = min(y)
+    max_y = max(y)
+
+    longitud = (max_y - min_y)/divisiones    
+    extremo_inferior = min_y
+    extremo_superior = min_y + longitud
+
+    datos_en_rango = np.arange(divisiones)
+    cantidad_minima = np.infty
+    cantidad_maxima = - np.infty
+    indice_minimo = None
+    indice_maximo = None
+    
+    
+    for i in range(divisiones):
+        datos_en_rango[i] = np.count_nonzero(
+            (extremo_inferior <= y ) &
+            (y <= extremo_superior)
+        )
+        extremo_inferior = extremo_superior
+        extremo_superior += longitud
+
+        if cantidad_minima > datos_en_rango[i]:
+            cantidad_minima = datos_en_rango[i]
+            indice_minimo = i
+        if cantidad_maxima < datos_en_rango[i]:
+            cantidad_maxima = datos_en_rango[i]
+            indice_maximo = i
+
+    # imprimimos valores
+    print('\nDistribución de las etiquetas de y en rango valores de [%.4f, %.4f] \n'%(min_y, max_y))
+    
+    print('Número total de etiquetas ', len(y))
+    
+    print('Cantidad mínima de datos ', cantidad_minima)
+    extremo_inferior = min_y + longitud * indice_minimo
+    print(f'Alcanzada en intervalo [%.4f , %.4f]'%
+          (extremo_inferior , (extremo_inferior + longitud)))
+    
+    print('Cantidad máxima de datos ', cantidad_maxima)
+    extremo_inferior = min_y + longitud * indice_maximo
+    print(f'Alcanzada en intervalo [%.4f , %.4f]'%
+          (extremo_inferior , (extremo_inferior + longitud)))
+    print('La media de datos por intervalo es %.4f'% datos_en_rango.mean())
+    print('La desviación típica de datos por intervalos es %.4f' % datos_en_rango.std())
+    print('La mediana de y es %4.f' % np.median(y))
+    print('La media de datos %.4f'% y.mean())
+    print('La desviación típica de datos %.4f'% y.std())
+    
+    Parada('Gráfico de balanceo')
+    # gráfico  de valores
+    plt.title('Número de etiquetas por rango de valores')
+    plt.bar([i*longitud + min_y for i in range(len(datos_en_rango))],
+            datos_en_rango, width = longitud * 0.9)
+    plt.xlabel('Valor de la etiqueta y (rango de longitud %.3f)'%longitud)
+    plt.ylabel('Número de etiquetas')
+    plt.show()
+    
+
+BalanceadoRegresion(y_train, divisiones = 25)
