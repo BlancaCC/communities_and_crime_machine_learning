@@ -126,14 +126,16 @@ def TratamientoDatosPerdidos(x, porcentaje_eliminacion = 20):
     INPUT
     x: atributos
     porcentaje_eliminacion: a partir de qué porcentaje se eliminan del conjutno de datos
-    OUTPUT x con el siguiemnte criterio de datos perdidos
+    OUTPUT x con el siguiemnte criterio de datos perdidos:
+
+    eliminamos los atributos que tengan una pérdida mayor o igual del $20\%$
+    para el resto los completamos con la media de valores válidos de ese atributo más un valor aleatorio dentro del intervalo $[-1.5 \sigma, 1.5 \sigma ]$ siendo $\sigma$ la desviación típica de la variable dicha.  
     '''
 
-    # umbra datos perdidos para eliminar
+    # numero umbral de datos perdidos para eliminar dicho atributo
     umbral_perdido = len(x) * porcentaje_eliminacion/100
    
-    # eliminamos los atributos que tengan más del porcentaje_eliminacion de datso perdidos
-                     
+    # eliminamos los atributos que tengan más del porcentaje_eliminacion de datso perdidos                  
     x_eliminada = x.T[[ sum(np.isnan(atributo))
                         < umbral_perdido for atributo in x.T ]]
 
@@ -160,6 +162,7 @@ def TratamientoDatosPerdidos(x, porcentaje_eliminacion = 20):
 
 x,y = LeerDatos(NOMBRE_FICHERO, SEPARADOR)
 x = TratamientoDatosPerdidos(x, porcentaje_eliminacion = 20)
+
 ###### separación test y entrenamiento  #####
 ratio_test_size = 0.2
 x_train, x_test, y_train, y_test = train_test_split(
@@ -244,3 +247,79 @@ def BalanceadoRegresion(y, divisiones = 20):
     
 
 BalanceadoRegresion(y_train, divisiones = 25)
+
+
+## quitamso outliers
+
+def EliminaOutliers(y, proporcion_distancia_desviacion_tipica = 3.0):
+    '''
+    OUTPUT
+    (muestra en pantalla alguna información sobre el cálculo de la máscara)
+    mascara_y_sin_outliers
+    INPUT
+    y: etiquetas a las que quitar el outliers
+
+    proporcion_distancia_desviacion_tipica = 3.0
+   
+    Información sobre cómo elegir la proporcion_distancia_desviacion_tipica:
+    Alguna relaciones: 
+    distancia | intervalo de confianza:
+    1         | 0.683
+    1.282     | 0.8
+    1.644     | 0.9
+    2         | 0.954
+    3         | 0.997
+    3.090     | 0.998
+    4         | 0.9999367
+    5         | 0.99999942
+    
+    
+
+    https://es.wikipedia.org/wiki/Distribuci%C3%B3n_normal#Desviaci%C3%B3n_t%C3%ADpica_e_intervalos_de_confianza
+    '''
+    media = y.mean()
+    desviacion_tipica = y.std()
+
+    corte = desviacion_tipica * proporcion_distancia_desviacion_tipica
+    limite_inferior = media - corte
+    limite_superior = media + corte
+
+    mascara_y_sin_outliers = (limite_inferior <= y ) & (y <= limite_superior)
+       
+    # imprimimos información
+    print('\n___ Información eliminando outliers___')
+    print('Proporcion de deistancia a la desviación típica tomada ',
+          proporcion_distancia_desviacion_tipica)
+    print('Media de los datos %.4f'% media)
+    print('Desviación típica %.4f'% desviacion_tipica)
+    print('Rango de valores aceptado [%.4f, %.4f]' %
+          (limite_inferior, limite_superior ))
+
+    print(f'Número de outliers eliminados { np.count_nonzero(mascara_y_sin_outliers == False)}')
+
+    return mascara_y_sin_outliers
+
+
+mascara_sin_outliers = EliminaOutliers(y_train, proporcion_distancia_desviacion_tipica = 3)
+
+#mantenemos copia para después compararlos  
+x_train_con_outliers = np.copy(x_train)
+y_train_con_outliers = np.copy(y_train)
+
+x_train = x_train[mascara_sin_outliers]
+y_train = y_train[mascara_sin_outliers]
+
+
+Parada('Normalizamos los datos')
+#Normalizamos los datos para que tengan media 0 y varianza 1
+
+x_train_sin_normalizar = np.copy(x_train)
+x_test_sin_normalizar = np.copy(x_test)
+
+scaler = StandardScaler()
+x_train = scaler.fit_transform( x_train )
+x_test = scaler.transform( x_test) 
+
+scaler_outliers = StandardScaler()
+x_train_outliers_normalizado = scaler_outliers.fit_transform( x_train_con_outliers )
+x_test_outliers_normalizado = scaler_outliers.transform(x_test_sin_normalizar)
