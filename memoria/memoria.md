@@ -33,6 +33,99 @@ Las atiquetas aportadas son en total 122 predictivas, 5 no predictivas y una obj
 
 
 
+## Codificación de los datos de entrada  
+
+Para leer los datos nos enfrentamos a dos problemas:
+- Existencia de atributos nominales y no predictivos.  
+- Hay pérdida de datos.  
+
+### Atributos no predictivos y nominales  
+
+
+Atendiendo a [Attribute Information](#attribute-information) tenemos que los cinco primeros atributos son no predicctivos, luego los eliminamos directamente.  
+
+El resto de valores son decimales, luego los procesamos sin problema.   
+
+
+<!--Categorías: https://www.kdnuggets.com/2021/05/deal-with-categorical-data-machine-learning.html -->
+
+### Pérdida de datos  
+
+Aplicamos el critero dado en el guión, eliminamos los atributos que tengan una pérdida mayor o igual del $20\%$, para el resto los completamos con la media de valores válidos de ese atributo más un valor aleatorio dentro del intervalo $[-1.5 \sigma, 1.5 \sigma ]$ siendo $\sigma$ la desviación típica de la variable dicha.  
+
+Todo esto se implementa en nuestra función `TratamientoDatosPerdidos(x, porcentaje_eliminacion = 20)`.  
+
+## Separación test y entrenamiento  
+
+Utilizamos la separación clásica: $20\%$ de los datos para test y el resto para entrenamiento , ya que el tamaño de muestra 1994 los consideramos suficiente.  Antes de hacer la separación se han desordenado los datos y a partir de ahora solo se trabajará con los datos del conjunto de entrenamiento.  
+
+
+## Eliminación de valores atípicos  
+
+Vamos consenvar los datos dentro de un intervalo de cnfianza del 0.997, para eliminar posibles ruidos.  
+
+( ¿ESTO HABRÍA QUE AMPLIARLO? ¿CÓMO LO VES? )   
+
+La función utilizada para esto ha sido   
+
+```python
+def EliminaOutliers(y, proporcion_distancia_desviacion_tipica = 3.0):
+    '''
+    OUTPUT
+    (muestra en pantalla alguna información sobre el cálculo de la máscara)
+    mascara_y_sin_outliers
+    INPUT
+    y: etiquetas a las que quitar el outliers
+
+    proporcion_distancia_desviacion_tipica = 3.0
+   
+    Información sobre cómo elegir la proporcion_distancia_desviacion_tipica:
+    Alguna relaciones: 
+    distancia | intervalo de confianza:
+    1         | 0.683
+    1.282     | 0.8
+    1.644     | 0.9
+    2         | 0.954
+    3         | 0.997
+    3.090     | 0.998
+    4         | 0.9999367
+    5         | 0.99999942
+    
+    
+
+    https://es.wikipedia.org/wiki/Distribuci%C3%B3n_normal#Desviaci%C3%B3n_t%C3%ADpica_e_intervalos_de_confianza
+    '''
+```
+
+## Normalizamos los datos  
+
+Procedemos también a tificar los datos. Esto nos va a dar algunas ventajas como reducier la gran diferencia de escala en los valores manteniendo las difrencias.
+
+Exiten diferentes métodos de transformación (z-score, min-max, logística...), nosotros hemos optado por el Z-score. [@tificiacionMicrosoft] Que consiste en una transformación de la variable aleatoria $X$ a otra, $Z$ de media cero y varianza uno. $$Z = \frac{ x - \bar{x}}{\sigma}$$
+
+Donde $\bar x$ representa la media de $X$ y $\sigma$ la desviación típica.
+
+Para la implementación utilizamos la función StandardScaler() y los métodos fit_transform( x_train ) y scaler.transform( x_test). [@StandardScaler]
+
+La necesidad de estos método es normalizar a partir de los datos de entrenamiento, guardar la media y varianza de estos datos y luego aplicar la misma transformación (con los mismo datos de entrenamiento) al test, esto se realiza así ya que si se aplicara la transformación a todos los datos se estaría cometiendo data snopping.  
+
+## Reducción de dimensión PAC  
+
+ALEX: No creo que esto mejore el ajuste, pero sí que puede mejorar los tiempos.  
+Si eso lo implementamos más adelantes, si nos sobra tiempo   
+
+### Procesado aplicado a los datos  
+
+Acabamos el prepocesado con los siguientes posibilidades para conjunto de entrenamiento:   
+
+- `x_train` : Sin autliers, normalizado.
+- `x_train_sin_normalizarn`: sin outliers, normalizado.   
+- `x_train_outliers_normalizado`: con outliers, normalizado.  
+- `x_train_con_outliers`: con outliers, sin normalizar.  
+
+
+
+
 
 # Apéndice  
 

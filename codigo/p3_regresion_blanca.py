@@ -747,7 +747,8 @@ Separador('Coeficientes')
 
 def EvaluacionCoeficientes( w, title, mostrar_coeficientes = False):
     print(title)
-    
+    print(x_train )
+
     if(mostrar_coeficientes):
         print(w)
 
