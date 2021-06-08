@@ -328,6 +328,13 @@ x_train_outliers_normalizado = scaler_outliers.fit_transform( x_train_con_outlie
 x_test_outliers_normalizado = scaler_outliers.transform(x_test_sin_normalizar)
 
 
+print("\nDimensiones de los datos con las distintas transformaciones: \n")
+print("\nMatriz x de características de entrenamiento con outliers sin normalizar: ", x_train_con_outliers.shape)
+print("\nVector y de etiquetas de entrenamiento con outliers: ", y_train_con_outliers.shape)
+print("-------------------------------------------------------------------------------------")
+print("\nMatriz x de características de entrenamiento sin outliers normalizada: ", x_train_sin_normalizar.shape)
+print("\nVector y de etiquetas de entrenamiento sin outliers: ", y_train.shape)
+
 
 #######################################################################
 #

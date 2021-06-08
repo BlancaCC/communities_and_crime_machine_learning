@@ -60,7 +60,7 @@ import time
 np.random.seed(1)
 
 ########## CONSTANTES #########
-NOMBRE_FICHEROS_REGRESION  = ['./datos/train.csv','./datos/unique_m.csv'] # solo se va a leer el primero 
+NOMBRE_FICHEROS_REGRESION  = ['./datos/communities.data','./datos/unique_m.csv'] # solo se va a leer el primero 
 SEPARADOR_REGRESION = ','
 
 NUMERO_CPUS_PARALELO = 4
