@@ -32,6 +32,9 @@ from sklearn.linear_model import Lasso
 from sklearn.svm import SVR
 from sklearn.linear_model import SGDRegressor
 
+# Modelos no lineales a usar
+# =============================================
+from sklearn.neural_network import MLPRegressor
 
 # Preprocesado 
 # ==========================
@@ -245,8 +248,8 @@ def BalanceadoRegresion(y, divisiones = 20):
     plt.ylabel('Número de etiquetas')
     plt.show()
     
-
-BalanceadoRegresion(y_train, divisiones = 25)
+# DESCOMENTAR
+#BalanceadoRegresion(y_train, divisiones = 25)
 
 
 ## quitamso outliers
@@ -323,3 +326,83 @@ x_test = scaler.transform( x_test)
 scaler_outliers = StandardScaler()
 x_train_outliers_normalizado = scaler_outliers.fit_transform( x_train_con_outliers )
 x_test_outliers_normalizado = scaler_outliers.transform(x_test_sin_normalizar)
+
+
+
+#######################################################################
+#
+#       Función para evaluar los distintos métodos
+#
+##########################################################################
+
+
+
+def Evaluacion( clasificador,
+                x, y, 
+                k_folds,
+                nombre_modelo,
+                metrica_error):
+    '''
+    Función para automatizar el proceso de experimento: 
+    1. Ajustar modelo.
+    2. Aplicar validación cruzada.
+    3. Medir tiempo empleado en ajuste y validación cruzada.
+    4. Medir la precisión.   
+
+    INPUT:
+    - Clasificador: Modelo con el que buscar el clasificador
+    - X datos entrenamiento. 
+    - Y etiquetas de los datos de entrenamiento
+    - k-folds: número de particiones para la validación cruzada
+    - metrica_error: debe estar en el formato sklearn (https://scikit-learn.org/stable/modules/model_evaluation.html)
+
+    OUTPUT:
+    '''
+
+    ###### constantes a ajustar
+    numero_trabajos_paralelos_en_validacion_cruzada = NUMERO_CPUS_PARALELO
+    ##########################
+    
+    print('\n','-'*20)
+    print (f' Evaluando {nombre_modelo}')
+    
+    #print(f'\n------ Ajustando modelo------\n')        
+    tiempo_inicio_ajuste = time.time()
+    
+    #ajustamos modelo 
+    ajuste = clasificador.fit(x,y) 
+    tiempo_fin_ajuste = time.time()
+
+    tiempo_ajuste = tiempo_fin_ajuste - tiempo_inicio_ajuste
+
+    
+    
+
+    #validación cruzada
+    tiempo_inicio_validacion_cruzada = time.time()
+
+    score_validacion_cruzada = cross_val_score(
+        clasificador,
+        x, y,
+        scoring = metrica_error,
+        cv = k_folds,
+        n_jobs = numero_trabajos_paralelos_en_validacion_cruzada
+    )
+    tiempo_fin_validacion_cruzada = time.time()
+    
+    tiempo_validacion_cruzada = tiempo_fin_validacion_cruzada - tiempo_inicio_validacion_cruzada
+
+    print('\tscore_validacion_cruzada')
+    print(score_validacion_cruzada)
+    
+    print('--------------------')
+    print ('\tMedia error de validación cruzada {:.5f} '.format(score_validacion_cruzada.mean()))
+    print('--------------------')
+    
+    print('\tDesviación típica del error de validación cruzada {:.5f} '.format(score_validacion_cruzada.std()))
+    print('\tTiempo empleado para el ajuste: {:.4f}s '.format(tiempo_ajuste))
+    print('\tTiempo empleado para el validacion cruzada {:.4f}s'.format(tiempo_validacion_cruzada))
+
+
+
+    return ajuste
