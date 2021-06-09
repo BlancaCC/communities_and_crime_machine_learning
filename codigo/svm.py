@@ -44,7 +44,7 @@ from operator import itemgetter #ordenar lista
 import time
 
 
-
+#redundante
 np.random.seed(1)
 ######### CONSTANTES #########  
 NOMBRE_FICHERO_REGRESION = './datos/train.csv'
