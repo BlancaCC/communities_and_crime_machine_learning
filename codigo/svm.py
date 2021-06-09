@@ -23,7 +23,7 @@ import numpy as np
 # Modelos lineales de Regresión a usar   
 # =========================================
 from sklearn.linear_model import SGDRegressor
-from sklearn.svm import LinearSVR
+from sklearn.svm import SVR
 
 
 # Validación cruzada
@@ -83,14 +83,14 @@ def Evaluacion( modelos, x, y, x_test, y_test, k_folds, nombre_modelo):
     np.random.seed(0)
     tiempo_inicio_validacion_cruzada = time.time()
 
-    best_score = np.infty
+    best_score = -np.infty
     for model in modelos:
         print(model)
         score = np.mean(cross_val_score(model, x, y, cv = k_folds, scoring="r2",n_jobs=-1))
         print('Error cuadrático medio del modelo con cv: ',score)
         print()
 
-        if best_score > score:
+        if best_score < score:
             best_score = score
             best_model = model
 
@@ -121,18 +121,46 @@ def Evaluacion( modelos, x, y, x_test, y_test, k_folds, nombre_modelo):
 #################################################################
 ###################### Modelos a usar ###########################
 k_folds=10 #Número de particiones para cross-Validation
-
-print('\nPrimer Modelo: Regresión Lineal con SGD para obtener vector de pesos\n')
+'''
+print('\nPrimer Modelo: SVM aplicado a Regresión con kernel polinómico\n')
 #Primer Modelo: Regresión Lineal con SGD para obtener vector de pesos
 #Hago un vector con modelos del mismo tipo pero variando los parámetros
-modelos1=[SGDRegressor(loss='squared_loss', penalty=pen, alpha=a, learning_rate = lr, eta0 = 0.01, max_iter=5000)  for a in [0.0001,0.001] for pen in ['l1', 'l2'] for lr in ['optimal', 'adaptive'] ]
-modelo_elegido1=Evaluacion( modelos1, x_train, y_train, x_test, y_test, k_folds, 'Regresion Lineal usando SGD')
-input("\n--- Pulsar tecla para continuar ---\n")
-
-
-print('\nModelo: Regresión lineal con SVM\n')
-#Modelo: Regresión Lineal con SVM
-modelos2=[LinearSVR(epsilon=e, random_state=0, max_iter=10000) for e in [1, 1.5, 2, 2.5, 3, 3.5]]
+modelos2=[SVR(kernel='poly', degree=d, gamma=g, coef0=coef0, C=c, epsilon=e) for e in [0.1,0.3,0.5] for g in ['scale','auto'] for coef0 in [0.0,1.0] for d in [2,3] for c in [0.5,1,1.5]]
 
 #Usando cross-Validation tomo el modelo con los parámetros que mejor comportamiento tiene
 modelo_elegido2=Evaluacion( modelos2, x_train, y_train, x_test, y_test, k_folds, 'SVM aplicado a Regresión')
+print ("Ajustamos ahora con Outliers")
+modelo_elegido2=Evaluacion( modelos2, x_train_outliers_normalizado, y_train_con_outliers, x_test, y_test, k_folds, 'SVM aplicado a Regresión')
+'''
+
+
+print('\nSegundo Modelo: SVM aplicado a Regresión con kernel RBF\n')
+#Primer Modelo: Regresión Lineal con SGD para obtener vector de pesos
+#Hago un vector con modelos del mismo tipo pero variando los parámetros
+modelos2=[SVR(kernel='rbf', degree=d, gamma=g, coef0=coef0, C=c, epsilon=e) for e in [0.1,0.3,0.5] for g in ['scale','auto'] for coef0 in [0.0,1.0] for d in [2,3] for c in [0.5,1,1.5]]
+
+#Usando cross-Validation tomo el modelo con los parámetros que mejor comportamiento tiene
+modelo_elegido2=Evaluacion( modelos2, x_train, y_train, x_test, y_test, k_folds, 'SVM aplicado a Regresión')
+print ("Ajustamos ahora con Outliers")
+modelo_elegido2=Evaluacion( modelos2, x_train_outliers_normalizado, y_train_con_outliers, x_test, y_test, k_folds, 'SVM aplicado a Regresión')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
