@@ -123,9 +123,26 @@ Acabamos el prepocesado con los siguientes posibilidades para conjunto de entren
 - `x_train_outliers_normalizado`: con outliers, normalizado.  
 - `x_train_con_outliers`: con outliers, sin normalizar.  
 
+Si nos fijamos en la dimensión de la matriz de características x dependiendo de la transformación utilizada podemos observar lo siguiente: 
+
+```python
+
+Dimensiones de los datos con las distintas transformaciones: 
 
 
+Matriz x de características de entrenamiento con outliers sin normalizar:  (1595, 100)
 
+Vector y de etiquetas de entrenamiento con outliers:  (1595,)
+-------------------------------------------------------------------------------------
+
+Matriz x de características de entrenamiento sin outliers normalizada:  (1556, 100)
+
+Vector y de etiquetas de entrenamiento sin outliers:  (1556,)
+```
+
+Como podemos observar, de las 122 características posibles que tenía nuestra matriz x de entrenamiento en un principio, como 5 no son predictivos y la última columna son las etiquetas correspondientes a cada fila, el conjunto de atributos se nos queda en 116. Después, tras la gestión de atributos perdidos se eliminaron 16 atributos (pues tenían más de un 20% de valores perdidos), quedándose así un total de 100 características que utilizaremos para entrenar nuestros modelos.
+
+Por otra parte, en el proceso de eliminar outliers (como se puede ver en el número de filas) se eliminan un total de 39 filas.
 
 # Apéndice  
 
