@@ -44,13 +44,13 @@ from operator import itemgetter #ordenar lista
 import time
 
 
-
+# ESTO SOBRA 
 np.random.seed(1)
 ######### CONSTANTES #########  
 NOMBRE_FICHERO_REGRESION = './datos/train.csv'
 
 ################ funciones auxiliares
-
+#ESTO SOBRA YA QUE LO QUE HAY QUE HACER ES UN import del main y que esto esté en el main
 ### Validación cruzada
 def Evaluacion( modelos, x, y, x_test, y_test, k_folds, nombre_modelo):
     '''
@@ -116,7 +116,7 @@ def Evaluacion( modelos, x, y, x_test, y_test, k_folds, nombre_modelo):
 
     return best_model
   
-              
+#NO ME METAS UN INPU, QUE PA ESO YA HAY CREADO UNA FUNCIÓN QUE SE LLAMA Parada()             
 input("\n--- Pulsar tecla para continuar ---\n")
 
 #################################################################
