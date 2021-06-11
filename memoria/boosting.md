@@ -1,34 +1,23 @@
 # Boosting   
 
-Se hará un estudio utilizando un modelo de regresión de boosting pro gradiente.  
+Se hará un estudio utilizando el modelo de AdaBoost para regresión introducido por Freund y Schapire en 1995.  
+TODO Añadir la bibliografía   Y. Freund, R. Schapire, "A Decision-Theoretic Generalization of on-Line Learning and an Application to Boosting", 1995.  
 
 Para ello se utilizará la función 
 
 ```python
-class sklearn.ensemble.GradientBoostingRegressor(*, loss='ls', learning_rate=0.1,
-n_estimators=100, subsample=1.0,
-criterion='friedman_mse', min_samples_split=2,
-min_samples_leaf=1, min_weight_fraction_leaf=0.0, 
-max_depth=3, min_impurity_decrease=0.0,
-min_impurity_split=None, init=None, 
-random_state=None, max_features=None, 
-alpha=0.9, verbose=0, max_leaf_nodes=None, 
-warm_start=False, validation_fraction=0.1,
-n_iter_no_change=None, tol=0.0001, ccp_alpha=0.0)
-```  
+ class sklearn.ensemble.AdaBoostRegressor(base_estimator=None,
+ *, n_estimators=50, learning_rate=1.0,
+ loss='linear', random_state=None)
+```
 
-TODO: Escribir esto como buena bibliografía.  
-
-De la biblioteca de sklearn: https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.GradientBoostingRegressor.html  
-
+Bibliografía: 
+-  Teoría: https://scikit-learn.org/stable/modules/ensemble.html#adaboost  
+- Implementación: https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.AdaBoostRegressor.html  
 
 Los hiperparámetros que ajustaremos y utilizaremos de esta función son los siguientes.   
 
+-  `base_estimator` objeto con el estimador base que utilizar, utilizares `DecisionTreeRegressor` inicialos con profundidad máxima de tres. (TODO, justificar, en el guión se nos indica que utilicemos estos.    
 - `learning_rate` haremos un estudio de cómo varía en función del larning rate.  
-- `loss` utilizaremos `huber` por el estudio preliminar que aparece en machine learnng from theory to algorithm (TODO añadir referencia exacta).  
-- `n_estimator` númerod de *boosting stages* (TODO buscar qué significa), según la propia documentación es bastante robusto contra el sobre ajuste, por lo que mayor número genera mejores resultados. Realizaremos un estudio.  
-- `subsample` La fracción de ejemplo que se usa para ajustar la base individual (TODO consultar bibliografía).  
-- `criterion{‘friedman_mse’, ‘mse’, ‘mae’},`  función que meide la calidad de la partición (TODO consultar la bibliografía).  
-- `min_samples_split`  número mínimo de ejemplo para la partición del nodo interno.  
-
-- `min_samples_leaf`. 
+- `loss` La función de pérdida para actualizar los pesos del boosting en cada iteración.   
+- `n_estimators` número de estimadores para el cual el boosting termina, en caso de encontrarse un ajuste perfector pararía antes.   
