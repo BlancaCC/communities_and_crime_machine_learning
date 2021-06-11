@@ -8,7 +8,7 @@ En nuestro caso vamos a considerar las siguientes clases de hipótesis:
 
 ## Necesidad de la normalización de los datos e interés de la técnica usada
 
-En este caso, sabemos que el SVM es sensible al escalado de los datos, pues la en la función de regresión que obtengamos aquellos atributos con mayor ecala tendrán una mayor influencia en la elección del estimador, y es por eso que se recomienda (como podemos ver en la documentación) que los datos se encuentren normalizados o estandarizados. Es por eso que para este modelo concreto utilizaremos los datos estandarizados con StandardScaler() de sklearn.
+El SVM es sensible al escalado de los datos, ya que en la función de regresión que obtengamos aquellos atributos con mayores valores tendrán una mayor influencia en la elección del estimador, y es por eso que se recomienda (inclusive en la propia documentación de sklearn) que los datos se encuentren normalizados o estandarizados. Es por eso que para este modelo concreto utilizaremos los datos estandarizados con StandardScaler() de sklearn.
 
 Además compararemos el comportamiento del modelo en datos con Outliers y datos sin Outliers.
 
@@ -20,7 +20,7 @@ Dados los vectores de entrenamiento $x_i \in \mathbb{R}^p, i=1,...,n$ y el vecto
 
 ![](./imagenes/SVM/problema_primal.png)
 
-Dónde $\epsilon$ sería el ancho del pasillo de regresión (explicarlo  de https://scikit-learn.org/stable/modules/svm.html#kernel-functions)
+Donde $\epsilon$ sería el ancho del pasillo de regresión (explicarlo  de https://scikit-learn.org/stable/modules/svm.html#kernel-functions)
 
 Problema dual: 
 ![](./imagenes/SVM/problema_primal.png)
