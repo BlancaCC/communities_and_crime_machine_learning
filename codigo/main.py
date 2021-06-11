@@ -35,6 +35,7 @@ from sklearn.linear_model import SGDRegressor
 # Modelos no lineales a usar
 # =============================================
 from sklearn.neural_network import MLPRegressor
+from sklearn.ensemble import GradientBoostingClassifier
 
 # Preprocesado 
 # ==========================
@@ -382,8 +383,7 @@ def Evaluacion( clasificador,
 
     tiempo_ajuste = tiempo_fin_ajuste - tiempo_inicio_ajuste
 
-    
-    
+     
 
     #validación cruzada
     tiempo_inicio_validacion_cruzada = time.time()
