@@ -57,6 +57,8 @@ import seaborn as sns # utilizado para pintar la matriz de correlación
 # ==========================
 from sklearn.model_selection import cross_val_predict
 from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import GridSearchCV
+from numpy.ma import getdata # para rescatar elementos del grid 
 
 
 # metricas
@@ -413,3 +415,68 @@ def Evaluacion( clasificador,
 
 
     return ajuste
+
+
+
+
+ 
+def MuestraResultadosVC( estimador, parametros):
+    '''
+    Dados una serie de parametros y un estimador muestra en pantalla los mejores hiperparámetros junto con su error, así como una tabla que resuma todo 
+    '''
+    grid = GridSearchCV(
+        estimator = estimador,
+        param_grid = parametros,
+        scoring = 'r2',
+        n_jobs = -1,
+        verbose = 0 # cero to have no verbose 
+        #cv = croosvalidation
+    )
+
+    grid.fit(x_train, y_train)
+    
+    print ('Ya se ha terminado el croosValidation')
+    #Parada('Procesamos a ver los mejores estimadores: ')
+    print('Procesamos a ver los mejores estimadores: ')
+    
+
+
+    print('Mejores parámetros: ', grid.best_params_)
+    print('Con una $R^2$ de: ', grid.best_score_ , '\n' )
+
+
+    ## Función para evaluar los resultados del cross validation por orden
+    grid.cv_results_['rank_test_score'] # devuelve por orden 
+
+    getdata( grid.cv_results_['param_learning_rate'])[0] # para leer los parámetros que existen 
+    
+    
+    l = len(grid.cv_results_['rank_test_score'])
+    rank_indice = list(
+        zip(
+            grid.cv_results_['rank_test_score'],
+            [i for i in range(l)]
+        )
+    )
+
+    rank_indice.sort(key = lambda x: x[0]) # ordenamos por ranking
+    parametros = grid.param_grid.keys()
+
+    print(' |Parámetros | $R^2$ medio | Desviación tipica $R^2$| Ranking | tiempo medio ajuste |      ')
+    print('|---|---|---|---|---|    ')
+    for ranking, indice in rank_indice:
+        # imprimimos las caracterísitcas de los parámetros evaluados 
+        for p in parametros:
+            print ( p ,
+                    getdata( grid.cv_results_['param_'+p])[indice], end = ' ')
+
+        print('|', end = ' ')
+        print( '{:.4f}'.format(grid.cv_results_['mean_test_score'][indice]),
+               end = ' | ')
+        print( '{:.4f}'.format(grid.cv_results_['std_test_score'][indice]),
+                   end = ' | ')
+        print( '{:.4f}'.format(grid.cv_results_['rank_test_score'][indice]),
+               end = ' | ')
+        print( '{:.4f}'.format(grid.cv_results_['mean_fit_time'][indice]),
+               end = '    \n')
+    
