@@ -20,11 +20,9 @@ import pandas as pd
 # ==========================
 import numpy as np
 
-# Modelos lineales de Regresión a usar   
+# Modelos a usar   
 # =========================================
-from sklearn.linear_model import SGDRegressor
-from sklearn.svm import SVR
-
+from sklearn.ensemble import RandomForestRegressor
 
 # Validación cruzada
 # ==========================
@@ -122,18 +120,16 @@ def Evaluacion( modelos, x, y, x_test, y_test, k_folds, nombre_modelo):
 ###################### Modelos a usar ###########################
 k_folds=10 #Número de particiones para cross-Validation
 
-#Primer Modelo: Regresión Lineal con SGD para obtener vector de pesos
-#Hago un vector con modelos del mismo tipo pero variando los parámetros
-print('\nPrimer Modelo: SVM aplicado a Regresión con kernel polinómico\n')
+#Modelo: Random Forest aplicado a Regresión
+#Grid de Parámetros
+print('\nRandom Forest aplicado a Regresión \n')
 parametros = {
-     'degree' :[2,3],
-    'gamma' : ['scale', 'auto'],
-    'C' : [0.1,0.2,0.5,1],
-    'epsilon': [0.01,0.05,0.1,0.2]
+     'max_features' :['auto','sqrt'],
+    'n_estimators' : [50,100,150,200]
     }
 
 
-modelo=SVR(kernel='poly')
+modelo=RandomForestRegressor(random_state=0)
 MuestraResultadosVC(modelo,parametros, x_train, y_train)
 
 Parada("Pulse una tecla para continuar")
@@ -141,58 +137,4 @@ Parada("Pulse una tecla para continuar")
 print ("Ajustamos ahora con Outliers")
 
 MuestraResultadosVC(modelo,parametros, x_train_outliers_normalizado, y_train_con_outliers)
-
-Parada("Pulse una tecla para continuar")
-
-print('\nSegundo Modelo: SVM aplicado a Regresión con kernel RBF\n')
-#Segundo Modelo: SVM aplicado a Regresión con kernel RBF
-#Hago un vector con modelos del mismo tipo pero variando los parámetros
-modelo=SVR(kernel='rbf')
-MuestraResultadosVC(modelo,parametros, x_train, y_train)
-
-Parada("Pulse una tecla para continuar")
-
-print ("Ajustamos ahora con Outliers")
-MuestraResultadosVC(modelo,parametros, x_train_outliers_normalizado, y_train_con_outliers)
-
-
-
-'''
-
-modelo_elegido2=Evaluacion( modelos2, x_train_outliers_normalizado, y_train_con_outliers, x_test, y_test, k_folds, 'SVM aplicado a Regresión')
-
-Parada("Pulse una tecla para continuar")
-
-print('\nSegundo Modelo: SVM aplicado a Regresión con kernel RBF\n')
-#Primer Modelo: Regresión Lineal con SGD para obtener vector de pesos
-#Hago un vector con modelos del mismo tipo pero variando los parámetros
-modelos2=[SVR(kernel='rbf', degree=d, gamma=g, C=c, epsilon=e) for e in [0.01,0.05,0.1,0.2] for g in ['scale','auto'] for d in [2,3] for c in [0.1,0.2,0.5,1]]
-
-#Usando cross-Validation tomo el modelo con los parámetros que mejor comportamiento tiene
-modelo_elegido2=Evaluacion( modelos2, x_train, y_train, x_test, y_test, k_folds, 'SVM aplicado a Regresión')
-
-Parada("Pulse una tecla para continuar")
-
-print ("Ajustamos ahora con Outliers")
-modelo_elegido2=Evaluacion( modelos2, x_train_outliers_normalizado, y_train_con_outliers, x_test, y_test, k_folds, 'SVM aplicado a Regresión')
-'''
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
