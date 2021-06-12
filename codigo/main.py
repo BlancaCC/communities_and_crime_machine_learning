@@ -90,8 +90,8 @@ def Parada(mensaje = None):
     '''
     Hace parada del código y muestra un mensaje en tal caso 
     '''
-    #print('\n-------- fin apartado, enter para continuar -------\n')
-    input('\n-------- fin apartado, enter para continuar -------\n')
+    print('\n-------- fin apartado, enter para continuar -------\n')
+    #input('\n-------- fin apartado, enter para continuar -------\n')
     
     if mensaje:
         print('\n' + mensaje)
@@ -462,8 +462,10 @@ def MuestraResultadosVC( estimador, parametros, x_entrenamiento, y_entrenamiento
 
     print(' |Parámetros | $R^2$ medio | Desviación tipica $R^2$| Ranking | tiempo medio ajuste |      ')
     print('|---|---|---|---|---|    ')
+    
     for ranking, indice in rank_indice:
-        # imprimimos las caracterísitcas de los parámetros evaluados 
+        # imprimimos las caracterísitcas de los parámetros evaluados
+        print ('| ', end = ' ')
         for p in parametros:
             print ( p ,
                     getdata( grid.cv_results_['param_'+p])[indice], end = ' ')
@@ -476,5 +478,5 @@ def MuestraResultadosVC( estimador, parametros, x_entrenamiento, y_entrenamiento
         print( '{:.4f}'.format(grid.cv_results_['rank_test_score'][indice]),
                end = ' | ')
         print( '{:.4f}'.format(grid.cv_results_['mean_fit_time'][indice]),
-               end = '    \n')
+               end = '|     \n')
     
