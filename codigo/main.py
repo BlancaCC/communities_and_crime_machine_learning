@@ -90,8 +90,8 @@ def Parada(mensaje = None):
     '''
     Hace parada del código y muestra un mensaje en tal caso 
     '''
-    print('\n-------- fin apartado, enter para continuar -------\n')
-    #input('\n-------- fin apartado, enter para continuar -------\n')
+    #print('\n-------- fin apartado, enter para continuar -------\n')
+    input('\n-------- fin apartado, enter para continuar -------\n')
     
     if mensaje:
         print('\n' + mensaje)
@@ -420,7 +420,7 @@ def Evaluacion( clasificador,
 
 
  
-def MuestraResultadosVC( estimador, parametros):
+def MuestraResultadosVC( estimador, parametros, x_entrenamiento, y_entrenamiento):
     '''
     Dados una serie de parametros y un estimador muestra en pantalla los mejores hiperparámetros junto con su error, así como una tabla que resuma todo 
     '''
@@ -433,7 +433,7 @@ def MuestraResultadosVC( estimador, parametros):
         #cv = croosvalidation
     )
 
-    grid.fit(x_train, y_train)
+    grid.fit(x_entrenamiento, y_entrenamiento)
     
     print ('Ya se ha terminado el croosValidation')
     #Parada('Procesamos a ver los mejores estimadores: ')
@@ -447,8 +447,6 @@ def MuestraResultadosVC( estimador, parametros):
 
     ## Función para evaluar los resultados del cross validation por orden
     grid.cv_results_['rank_test_score'] # devuelve por orden 
-
-    getdata( grid.cv_results_['param_learning_rate'])[0] # para leer los parámetros que existen 
     
     
     l = len(grid.cv_results_['rank_test_score'])
