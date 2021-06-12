@@ -308,8 +308,9 @@ def EliminaOutliers(y, proporcion_distancia_desviacion_tipica = 3.0):
 
 mascara_sin_outliers = EliminaOutliers(y_train, proporcion_distancia_desviacion_tipica = 3)
 
-#mantenemos copia para después compararlos  
-x_train_con_outliers = np.copy(x_train)
+#mantenemos copia para después compararlos
+
+x_train_con_outliers = np.copy(x_train) #Sin normalizar con outliers
 y_train_con_outliers = np.copy(y_train)
 
 x_train = x_train[mascara_sin_outliers]
@@ -319,7 +320,7 @@ y_train = y_train[mascara_sin_outliers]
 Parada('Normalizamos los datos')
 #Normalizamos los datos para que tengan media 0 y varianza 1
 
-x_train_sin_normalizar = np.copy(x_train)
+x_train_sin_normalizar = np.copy(x_train) # Sin normalizar sin outliers
 x_test_sin_normalizar = np.copy(x_test)
 
 scaler = StandardScaler()
@@ -465,7 +466,7 @@ def MuestraResultadosVC( estimador, parametros, x_entrenamiento, y_entrenamiento
     
     for ranking, indice in rank_indice:
         # imprimimos las caracterísitcas de los parámetros evaluados
-        print ('| ', end = ' ')
+        print ('| ', end = '')
         for p in parametros:
             print ( p ,
                     getdata( grid.cv_results_['param_'+p])[indice], end = ' ')
@@ -480,3 +481,19 @@ def MuestraResultadosVC( estimador, parametros, x_entrenamiento, y_entrenamiento
         print( '{:.4f}'.format(grid.cv_results_['mean_fit_time'][indice]),
                end = '|     \n')
     
+
+
+
+
+########################################################################
+## Función de transformación de datos
+def TransformacionPolinomica( grado,x):
+    '''
+    Devuelve un vector con transformaciones polinómicas 
+    '''
+    x_aux = np.copy(x)
+    for i in range(1,grado):
+        x_aux = x_aux*x_aux
+        x = np.c_[x_aux, x]
+    return x
+
