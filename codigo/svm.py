@@ -111,8 +111,8 @@ def Evaluacion( modelos, x, y, x_test, y_test, k_folds, nombre_modelo):
 
     Etest=r2_score(y_test, prediccion_test)
     Ein=r2_score(y, prediccion)
-    print("Error cuadratico medio en entrenamiento: ",Ein)
-    print("Error cuadratico medio en test: ",Etest)
+    print("E_in en entrenamiento: ",Ein)
+    print("E_test en test: ",Etest)
 
     return best_model
   
@@ -121,26 +121,32 @@ def Evaluacion( modelos, x, y, x_test, y_test, k_folds, nombre_modelo):
 #################################################################
 ###################### Modelos a usar ###########################
 k_folds=10 #Número de particiones para cross-Validation
-'''
+
 print('\nPrimer Modelo: SVM aplicado a Regresión con kernel polinómico\n')
 #Primer Modelo: Regresión Lineal con SGD para obtener vector de pesos
 #Hago un vector con modelos del mismo tipo pero variando los parámetros
-modelos2=[SVR(kernel='poly', degree=d, gamma=g, coef0=coef0, C=c, epsilon=e) for e in [0.1,0.3,0.5] for g in ['scale','auto'] for coef0 in [0.0,1.0] for d in [2,3] for c in [0.5,1,1.5]]
+modelos2=[SVR(kernel='poly', degree=d, gamma=g, coef0=coef0, C=c, epsilon=e) for e in [0.01,0.05,0.1,0.2] for g in ['scale','auto'] for coef0 in [0.0,1.0] for d in [2,3] for c in [0.1,0.2,0.5,1]]
 
 #Usando cross-Validation tomo el modelo con los parámetros que mejor comportamiento tiene
 modelo_elegido2=Evaluacion( modelos2, x_train, y_train, x_test, y_test, k_folds, 'SVM aplicado a Regresión')
+
+Parada("Pulse una tecla para continuar")
+
 print ("Ajustamos ahora con Outliers")
 modelo_elegido2=Evaluacion( modelos2, x_train_outliers_normalizado, y_train_con_outliers, x_test, y_test, k_folds, 'SVM aplicado a Regresión')
-'''
 
+Parada("Pulse una tecla para continuar")
 
 print('\nSegundo Modelo: SVM aplicado a Regresión con kernel RBF\n')
 #Primer Modelo: Regresión Lineal con SGD para obtener vector de pesos
 #Hago un vector con modelos del mismo tipo pero variando los parámetros
-modelos2=[SVR(kernel='rbf', degree=d, gamma=g, coef0=coef0, C=c, epsilon=e) for e in [0.1,0.3,0.5] for g in ['scale','auto'] for coef0 in [0.0,1.0] for d in [2,3] for c in [0.5,1,1.5]]
+modelos2=[SVR(kernel='rbf', degree=d, gamma=g, C=c, epsilon=e) for e in [0.01,0.05,0.1,0.2] for g in ['scale','auto'] for d in [2,3] for c in [0.1,0.2,0.5,1]]
 
 #Usando cross-Validation tomo el modelo con los parámetros que mejor comportamiento tiene
 modelo_elegido2=Evaluacion( modelos2, x_train, y_train, x_test, y_test, k_folds, 'SVM aplicado a Regresión')
+
+Parada("Pulse una tecla para continuar")
+
 print ("Ajustamos ahora con Outliers")
 modelo_elegido2=Evaluacion( modelos2, x_train_outliers_normalizado, y_train_con_outliers, x_test, y_test, k_folds, 'SVM aplicado a Regresión')
 

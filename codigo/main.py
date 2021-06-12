@@ -87,8 +87,8 @@ def Parada(mensaje = None):
     '''
     Hace parada del código y muestra un mensaje en tal caso 
     '''
-    print('\n-------- fin apartado, enter para continuar -------\n')
-    #input('\n-------- fin apartado, enter para continuar -------\n')
+    #print('\n-------- fin apartado, enter para continuar -------\n')
+    input('\n-------- fin apartado, enter para continuar -------\n')
     
     if mensaje:
         print('\n' + mensaje)
