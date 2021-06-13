@@ -270,7 +270,7 @@ print("\nVector y de etiquetas de entrenamiento sin outliers: ", y_train.shape)
 
 
 
-def Evaluacion( clasificador,
+def EvaluacionSimple( clasificador,
                 x, y, 
                 k_folds,
                 nombre_modelo,
@@ -406,6 +406,44 @@ def MuestraResultadosVC( estimador, parametros, x_entrenamiento, y_entrenamiento
 
     return grid.cv_results_
 
+
+############## Función para dibujar los resultados #########
+
+def GraficaError(parametros, resultados, nombre_parametros = None):
+    '''
+    INPUT: 
+    - parametros: lista con los parámetros con los que estamos probando
+    - resutlados: varieble que almacena el grid.cv_results_, el output de la función MuestraResultadosVC
+    - nombre_parametro que poner en el título y leyenda
+
+    OUTPUT: Void
+    Muestra en pantalla la figura deseada
+    '''
+    plt.clf()
+    plt.plot( parametros, resultados['mean_test_score'], c = 'red', label='R2') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
+    if (nombre_parametros == None):
+        plt.title("Evolución del coeficiente R2")
+        plt.xlabel('Valores parámetros')
+    else:
+        plt.title(f'Evolución del coeficiente R2 {nombre_parametros}')
+        plt.xlabel(nombre_parametros)
+        
+    plt.ylabel('R2')
+    plt.legend()
+    plt.show()
+
+   
+def GraficaRegularizacion(E_in,E_val,alpha):
+    '''TODO ALEX, explica tú esto
+    '''
+    plt.plot( alpha, E_in, c = 'orange', label='E_in') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
+    plt.plot( alpha, E_val, c = 'blue', label='E_test') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
+    plt.legend();
+    plt.title("Influencia de la regularización en train y validación")
+    plt.xlabel('alpha')
+    plt.ylabel('R2')
+    plt.figure()
+    plt.show()
 
 ########################################################################
 ## Función de transformación de datos
