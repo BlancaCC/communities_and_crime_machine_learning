@@ -265,48 +265,7 @@ print("-------------------------------------------------------------------------
 print("\nMatriz x de características de entrenamiento sin outliers normalizada: ", x_train_sin_normalizar.shape)
 print("\nVector y de etiquetas de entrenamiento sin outliers: ", y_train.shape)
 
-
-#######################################################################
-#
-#       Función para evaluar los distintos métodos
-#def EvolucionDatosEntrenamiento(modelo,
-                                x, y,
-                                numero_particiones,
-                                porcentaje_validacion = 0.2):
-    '''
-    Dado un modelos muestra la evolución del Error in y Error out
-    En función del tamaño de entrenamiento 
-
-    INPUT:
-    modelo: modelo a ajustar
-    numero_particiones: numero natural positvo 
-    porcentaje_validacion: porcentaje de x_entrenamiento que se usará para validación  
-    x, y
-
-
-    OUTPUT
-    El error se calcula por live one out 
-    '''
-
-    # retiramos subconjunto para test, para no hacer data snopping
-    x_train, x_test, y_train, y_test = train_test_split(
-    x, y,
-    test_size= porcentaje_validacion,
-    shuffle = True, 
-    random_state=1)
-
-    incremento = ceil(len(y_train)/ numero_particiones)
-    
-    size_set_entrenamiento = [incremento*i for i in range(1,numero_particiones+1)]
-    error_in = list()
-    error_out = list()
-
-    for tam in size_set_entrenamiento:
-        #no considero necesario
-        
-        ajuste = clasificador.fit(x_train[:tam], y_train[:tam])
-
-        
+     
 ##########################################################################
 
 
