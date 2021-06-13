@@ -30,7 +30,9 @@ Realizaremos estimaciones con el número de estimadores y la tasa de aprendizaje
 
  
 Mejores parámetros:  {'learning_rate': 0.01, 'n_estimators': 80}
-Con una $R^2$ de:  0.5863897348444905 
+Con una $R^2$ de:  0.5863897348444905  
+
+Table: Estudio priliminar de validación cruzada 
 
  | Parámetros                           | $R^2$ medio | Desviación tipica $R^2$ | Ranking | tiempo medio ajuste |
  |--------------------------------------|-------------|-------------------------|---------|---------------------|
@@ -51,7 +53,33 @@ Con una $R^2$ de:  0.5863897348444905
  | n_estimators 60 learning_rate 1      | 0.4813      | 0.0462                  | 15.0000 | 1.7972              |
  | n_estimators 100 learning_rate 1     | 0.4647      | 0.0587                  | 16.0000 | 2.6109              |  
 
-De esto valores observamos que una tasa de aprendizaje de entre 0.01 y 0.1 parece ser la mejor opción.  
+
+Mejores parámetros:  {'learning_rate': 0.1, 'n_estimators': 50}
+Con una $R^2$ de:  0.5862740782719961 
+
+Table: Estudio preliminal validación cruzada con semilla fijada al 2  
+
+ | Parámetros                           | $R^2$ medio | Desviación tipica $R^2$ | Ranking | tiempo medio ajuste |
+ |--------------------------------------|-------------|-------------------------|---------|---------------------|
+ | n_estimators 50 learning_rate 0.1    | 0.5863      | 0.0202                  | 1.0000  | 1.1438              |
+ | n_estimators 80 learning_rate 0.1    | 0.5861      | 0.0244                  | 2.0000  | 1.7830              |
+ | n_estimators 60 learning_rate 0.1    | 0.5855      | 0.0236                  | 3.0000  | 1.3541              |
+ | n_estimators 100 learning_rate 0.1   | 0.5833      | 0.0270                  | 4.0000  | 2.4317              |
+ | n_estimators 100 learning_rate 0.01  | 0.5815      | 0.0079                  | 5.0000  | 2.3232              |
+ | n_estimators 80 learning_rate 0.01   | 0.5813      | 0.0103                  | 6.0000  | 1.8622              |
+ | n_estimators 50 learning_rate 0.01   | 0.5810      | 0.0113                  | 7.0000  | 1.1620              |
+ | n_estimators 60 learning_rate 0.01   | 0.5804      | 0.0115                  | 8.0000  | 1.3902              |
+ | n_estimators 50 learning_rate 0.001  | 0.5784      | 0.0108                  | 9.0000  | 1.1661              |
+ | n_estimators 100 learning_rate 0.001 | 0.5777      | 0.0106                  | 10.0000 | 2.3328              |
+ | n_estimators 80 learning_rate 0.001  | 0.5771      | 0.0110                  | 11.0000 | 1.8735              |
+ | n_estimators 60 learning_rate 0.001  | 0.5762      | 0.0108                  | 12.0000 | 1.4104              |
+ | n_estimators 50 learning_rate 1      | 0.4983      | 0.0475                  | 13.0000 | 1.0247              |
+ | n_estimators 60 learning_rate 1      | 0.4941      | 0.0415                  | 14.0000 | 1.2157              |
+ | n_estimators 80 learning_rate 1      | 0.4857      | 0.0444                  | 15.0000 | 1.5510              |
+ | n_estimators 100 learning_rate 1     | 0.4756      | 0.0497                  | 16.0000 | 1.8999              |
+
+De esto valores observamos que una tasa de aprendizaje de entre 0.01 y 0.1 parece ser la mejor opción independeientemente de número de estimadores.  
+
 
 Analicemos cómo varía entonces si cambiamos el conjunto de entrenamiento:  
 
