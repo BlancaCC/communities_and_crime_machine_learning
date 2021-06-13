@@ -6,7 +6,7 @@ from main import *
 from sklearn.ensemble import AdaBoostRegressor
 from sklearn.model_selection import GridSearchCV
 from numpy.ma import getdata # para rescatar el orden que devuelve eso
-
+from math import floor
 
 '''
 Del fichero main se han exportado los datos: 
@@ -47,10 +47,10 @@ parametros = {
 
 
 # https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html
-boostingRegresion =  AdaBoostRegressor()
+boostingRegresion =  AdaBoostRegressor(random_state = 2)
 
 #DESCOMENTAR
-#MuestraResultadosVC( boostingRegresion, parametros, x_train, y_train)
+MuestraResultadosVC( boostingRegresion, parametros, x_train, y_train)
 
 
 Parada('Cambiamos conjuntos de entrenamiento')
@@ -106,11 +106,36 @@ for g in grados:
         g,
         x_train_outliers_normalizado)
 
+    ''' DESCOMENTAR
     MuestraResultadosVC( boostingRegresion,
                          parametros_seleccionados,
                          x_polinomio,
                          y_train_con_outliers
                         )
+    '''
     
+
+
+
+
+
+## _______ comprobación tamaños del conjunto de entrenamiento  ______
+
+#### modelo seleccionado
+Parada('Evolución de los errores en función del tamaño de entrenamiento')
+
+boosting_regresion_1 =  AdaBoostRegressor(
+    n_estimators = 50,
+    learning_rate = 0.1,
+    random_state = 2
+)
+
+
+
+EvolucionDatosEntrenamiento(boosting_regresion_1,
+                            x_train_con_outliers,
+                            y_train_con_outliers,
+                            numero_particiones = 20,
+                            porcentaje_validacion = 0.2)
 
 

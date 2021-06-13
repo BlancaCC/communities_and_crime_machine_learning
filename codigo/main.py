@@ -463,7 +463,7 @@ def TransformacionPolinomica( grado,x):
 
 
 ####################################################
-# Medición de si faltan datos
+# Comparativa de evolución del error frente tamaño de entrenamiento
 ###################################################
 
 
