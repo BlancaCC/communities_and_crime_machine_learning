@@ -404,7 +404,7 @@ def MuestraResultadosVC( estimador, parametros, x_entrenamiento, y_entrenamiento
                end = '|     \n')
     
 
-
+    return grid.cv_results_
 
 
 ########################################################################

@@ -52,84 +52,50 @@ NOMBRE_FICHERO_REGRESION = './datos/train.csv'
 ################ funciones auxiliares
 
 ### Validación cruzada
-def Evaluacion( modelos, x, y, x_test, y_test, k_folds, nombre_modelo):
+def Evaluacion( modelo, x, y, x_val, y_val, nombre_modelo):
     '''
-    Función para automatizar el proceso de experimento: 
-    1. Ajustar modelo.
-    2. Aplicar validación cruzada.
-    3. Medir tiempo empleado en ajuste y validación cruzada.
-    4. Medir Error cuadrático medio.   
+    Función para calcular error en entrenamiento y validación  
     INPUT:
-    - modelo: Modelo con el que buscar el clasificador
+    - modelo: Modelo con el que calcular los errores
     - X datos entrenamiento. 
     - Y etiquetas de los datos de entrenamiento
-    - x_test, y_test
-    - k-folds: número de particiones para la validación cruzada
-    OUTPUT:
+    - x_val, y_val conjunto de entrenamiento y etiquetas de validación
     '''
 
-    ###### constantes a ajustar
-    numero_trabajos_paralelos_en_validacion_cruzada = 2 
     ##########################
     
     print('\n','-'*60)
     print (f' Evaluando {nombre_modelo}')
     print('-'*60)
-
-
-    print('\n------ Comienza Validación Cruzada------\n')        
-
-    #validación cruzada
-    np.random.seed(0)
-    tiempo_inicio_validacion_cruzada = time.time()
-
-    best_score = -np.infty
-    for model in modelos:
-        print(model)
-        score = np.mean(cross_val_score(model, x, y, cv = k_folds, scoring="r2",n_jobs=-1))
-        print('Error cuadrático medio del modelo con cv: ',score)
-        print()
-
-        if best_score < score:
-            best_score = score
-            best_model = model
-
-    tiempo_fin_validacion_cruzada = time.time()
-    tiempo_validacion_cruzada = (tiempo_fin_validacion_cruzada
-                                 - tiempo_inicio_validacion_cruzada)
-
-    print(f'\nTiempo empleado para validación cruzada: {tiempo_validacion_cruzada}s\n')
-    
-    print('\n\nEl mejor modelo es: ', best_model)
-    print('E_val calculado en cross-validation: ', best_score)
-
     # Error cuadrático medio
     # predecimos test acorde al modelo
-    best_model.fit(x, y)
-    prediccion = best_model.predict(x)
-    prediccion_test = best_model.predict(x_test)
+    modelo.fit(x, y)
+    prediccion = modelo.predict(x)
+    prediccion_val = modelo.predict(x_val)
 
-    Etest=r2_score(y_test, prediccion_test)
+    Eval=r2_score(y_val, prediccion_val)
     Ein=r2_score(y, prediccion)
     print("E_in en entrenamiento: ",Ein)
-    print("E_test en test: ",Etest)
-
-    return best_model
+    print("E_val en validación: ",Eval)
+ 
   
-              
+def GraficaError(param, resultados,hiperparametro):
+    plt.plot( param, resultados['mean_test_score'], c = 'red', label='R2') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
+    plt.legend();
+    plt.title("Evolución del coeficiente R2 para n_estimators")
+    plt.xlabel(hiperparametro)
+    plt.ylabel('R2')
+    plt.figure()
+    plt.show()              
    
 #################################################################
 ###################### Modelos a usar ###########################
-k_folds=10 #Número de particiones para cross-Validation
-
-#Primer Modelo: Regresión Lineal con SGD para obtener vector de pesos
-#Hago un vector con modelos del mismo tipo pero variando los parámetros
 print('\nPrimer Modelo: SVM aplicado a Regresión con kernel polinómico\n')
 parametros = {
-     'degree' :[2,3],
-    'gamma' : ['scale', 'auto'],
-    'C' : [0.1,0.2,0.5,1],
-    'epsilon': [0.01,0.05,0.1,0.2]
+     'degree':[2],
+    #'gamma' : ['scale', 'auto']
+    #'C' : [0.1,0.2,0.5,1],
+    #'epsilon': [0.01,0.05,0.1,0.2]
     }
 
 
@@ -156,34 +122,60 @@ print ("Ajustamos ahora con Outliers")
 MuestraResultadosVC(modelo,parametros, x_train_outliers_normalizado, y_train_con_outliers)
 
 
+print("\nComo con Outliers da mejor resultado, vamos a estimar los parámetros para el ajuste con Outliers para los SVM con kernel polinómico y rbf")
+modelo2=SVR(kernel='rbf',degree=2)
 
-'''
+print("\n\nPrimero estimamos gamma")
+parametros = {
+    'gamma' : ['scale', 'auto']
+    }
+print("\n------------------SVM Kernel rbf------------------\n")
+MuestraResultadosVC(modelo2,parametros, x_train_outliers_normalizado, y_train_con_outliers)
 
-modelo_elegido2=Evaluacion( modelos2, x_train_outliers_normalizado, y_train_con_outliers, x_test, y_test, k_folds, 'SVM aplicado a Regresión')
+print("\n\nUna vez estimado el mejor valor de gamma para cada modelo veamos el valor de C\n")
+modelo2=SVR(kernel='rbf',degree=2,gamma='scale')
+C=[0.1,0.2,0.5,1]
+parametros = {
+    'C' : C,
+    }
 
-Parada("Pulse una tecla para continuar")
+print("\n------------------SVM Kernel rbf------------------\n")
+resultados=MuestraResultadosVC(modelo2,parametros, x_train_outliers_normalizado, y_train_con_outliers)
+GraficaError(C,resultados,"C")
 
-print('\nSegundo Modelo: SVM aplicado a Regresión con kernel RBF\n')
-#Primer Modelo: Regresión Lineal con SGD para obtener vector de pesos
-#Hago un vector con modelos del mismo tipo pero variando los parámetros
-modelos2=[SVR(kernel='rbf', degree=d, gamma=g, C=c, epsilon=e) for e in [0.01,0.05,0.1,0.2] for g in ['scale','auto'] for d in [2,3] for c in [0.1,0.2,0.5,1]]
-
-#Usando cross-Validation tomo el modelo con los parámetros que mejor comportamiento tiene
-modelo_elegido2=Evaluacion( modelos2, x_train, y_train, x_test, y_test, k_folds, 'SVM aplicado a Regresión')
-
-Parada("Pulse una tecla para continuar")
-
-print ("Ajustamos ahora con Outliers")
-modelo_elegido2=Evaluacion( modelos2, x_train_outliers_normalizado, y_train_con_outliers, x_test, y_test, k_folds, 'SVM aplicado a Regresión')
-'''
-
-
-
+C =np.arange(0.1, 0.31, 0.01).tolist()
+parametros = {
+    'C' : C,
+    }
+print("\n------------------SVM Kernel rbf------------------\n")
+resultados=MuestraResultadosVC(modelo2,parametros, x_train_outliers_normalizado, y_train_con_outliers)
+GraficaError(C,resultados,"C")
 
 
+print("\n\nFinalmente ajustamos epsilon")
+modelo1=SVR(kernel='poly',degree=2,gamma='auto',C=0.28)
+e= [0.01,0.05,0.1,0.2]
+parametros = {
+    'epsilon':e
+}
+
+print("\n------------------SVM Kernel rbf------------------\n")
+resultados=MuestraResultadosVC(modelo2,parametros, x_train_outliers_normalizado, y_train_con_outliers)
+GraficaError(e,resultados,"epsilon")
+
+
+e =np.arange(0.001, 0.051, 0.001).tolist()
+parametros = {
+    'epsilon':e
+}
+print("\n------------------SVM Kernel rbf------------------\n")
+resultados=MuestraResultadosVC(modelo2,parametros, x_train_outliers_normalizado, y_train_con_outliers)
+GraficaError(e,resultados,"epsilon")
 
 
 
+modelo_definitivo=SVR(kernel='poly',degree=2,gamma='auto',C=0.28,epsilon=0.03)
+Evaluacion(modelo_definitivo, x_train_outliers_normalizado, y_train_con_outliers, x_test, y_test, "SVR con Kernel rbf")
 
 
 
