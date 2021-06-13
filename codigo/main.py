@@ -407,6 +407,38 @@ def MuestraResultadosVC( estimador, parametros, x_entrenamiento, y_entrenamiento
     return grid.cv_results_
 
 
+############## Función para dibujar los resultados #########
+
+def GraficaError(parametros, resultados):
+    '''
+    INPUT: 
+    - parametros: lista con los parámetros con los que estamos probando
+    - resutlados: varieble que almacena el grid.cv_results_, el output de la función MuestraResultadosVC
+
+    OUTPUT: Void
+    Muestra en pantalla la figura deseada
+    '''
+    plt.plot( parametros, resultados['mean_test_score'], c = 'red', label='R2') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
+    plt.legend();
+    plt.title("Evolución del coeficiente R2 para n_estimators")
+    plt.xlabel('n_estimators')
+    plt.ylabel('R2')
+    plt.figure()
+    plt.show()
+
+   
+def GraficaRegularizacion(E_in,E_val,alpha):
+    '''TODO ALEX, explica tú esto
+    '''
+    plt.plot( alpha, E_in, c = 'orange', label='E_in') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
+    plt.plot( alpha, E_val, c = 'blue', label='E_test') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
+    plt.legend();
+    plt.title("Influencia de la regularización en train y validación")
+    plt.xlabel('alpha')
+    plt.ylabel('R2')
+    plt.figure()
+    plt.show()
+
 ########################################################################
 ## Función de transformación de datos
 def TransformacionPolinomica( grado,x):
