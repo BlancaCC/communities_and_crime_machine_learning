@@ -398,7 +398,7 @@ def MuestraResultadosVC( estimador, parametros, x_entrenamiento, y_entrenamiento
                end = ' | ')
         print( '{:.4f}'.format(grid.cv_results_['std_test_score'][indice]),
                    end = ' | ')
-        print( '{:.4f}'.format(grid.cv_results_['rank_test_score'][indice]),
+        print( '{:.0f}'.format(grid.cv_results_['rank_test_score'][indice]),
                end = ' | ')
         print( '{:.4f}'.format(grid.cv_results_['mean_fit_time'][indice]),
                end = '|     \n')
