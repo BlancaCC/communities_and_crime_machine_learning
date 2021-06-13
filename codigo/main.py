@@ -270,7 +270,7 @@ print("\nVector y de etiquetas de entrenamiento sin outliers: ", y_train.shape)
 
 
 
-def Evaluacion( clasificador,
+def EvaluacionSimple( clasificador,
                 x, y, 
                 k_folds,
                 nombre_modelo,
