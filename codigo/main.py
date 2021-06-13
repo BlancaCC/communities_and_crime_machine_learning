@@ -398,7 +398,7 @@ def MuestraResultadosVC( estimador, parametros, x_entrenamiento, y_entrenamiento
                end = ' | ')
         print( '{:.4f}'.format(grid.cv_results_['std_test_score'][indice]),
                    end = ' | ')
-        print( '{:.4f}'.format(grid.cv_results_['rank_test_score'][indice]),
+        print( '{:.0f}'.format(grid.cv_results_['rank_test_score'][indice]),
                end = ' | ')
         print( '{:.4f}'.format(grid.cv_results_['mean_fit_time'][indice]),
                end = '|     \n')
@@ -429,7 +429,11 @@ def TransformacionPolinomica( grado,x):
 
 def TablasComparativasEvolucion (tam, ein, eout):
     '''
-    Muestra dos tablas comparativas de la varación de los errores en función del tamaño de entrenamiento 
+    Muestra dos tablas comparativas de la variación 
+de los errores en función del tamaño de entrenamiento.
+
+    Esta función se utiliza exclusivamente en la función: 
+    EvolucionDatosEntrenamiento 
     '''
     Parada('Comarativas evolución error por tamaño muestra separadas')
     plt.figure(figsize = (9,9))
@@ -477,9 +481,12 @@ def EvolucionDatosEntrenamiento(modelo,
     porcentaje_validacion: porcentaje de x_entrenamiento que se usará para validación  
     x, y
 
-
     OUTPUT
-    El error se calcula por live one out 
+    El error se calcula a partir de un subconjunto de tamaño porcentaje de 
+    validación. 
+
+    Las tablas que muestra depende de las definidas en la función 
+    TablasComparativasEvolucion (tam, ein, eout)
     '''
 
     # retiramos subconjunto para test, para no hacer data snopping
