@@ -49,92 +49,155 @@ NOMBRE_FICHERO_REGRESION = './datos/train.csv'
 
 ################ funciones auxiliares
 
-### Validación cruzada
-def Evaluacion( modelos, x, y, x_test, y_test, k_folds, nombre_modelo):
+### Validación
+def Evaluacion( modelo, x, y, x_val, y_val, nombre_modelo):
     '''
-    Función para automatizar el proceso de experimento: 
-    1. Ajustar modelo.
-    2. Aplicar validación cruzada.
-    3. Medir tiempo empleado en ajuste y validación cruzada.
-    4. Medir Error cuadrático medio.   
+    Función para calcular error en entrenamiento y validación  
     INPUT:
-    - modelo: Modelo con el que buscar el clasificador
+    - modelo: Modelo con el que calcular los errores
     - X datos entrenamiento. 
     - Y etiquetas de los datos de entrenamiento
-    - x_test, y_test
-    - k-folds: número de particiones para la validación cruzada
-    OUTPUT:
+    - x_val, y_val conjunto de entrenamiento y etiquetas de validación
     '''
 
-    ###### constantes a ajustar
-    numero_trabajos_paralelos_en_validacion_cruzada = 2 
     ##########################
     
     print('\n','-'*60)
     print (f' Evaluando {nombre_modelo}')
     print('-'*60)
-
-
-    print('\n------ Comienza Validación Cruzada------\n')        
-
-    #validación cruzada
-    np.random.seed(0)
-    tiempo_inicio_validacion_cruzada = time.time()
-
-    best_score = -np.infty
-    for model in modelos:
-        print(model)
-        score = np.mean(cross_val_score(model, x, y, cv = k_folds, scoring="r2",n_jobs=-1))
-        print('Error cuadrático medio del modelo con cv: ',score)
-        print()
-
-        if best_score < score:
-            best_score = score
-            best_model = model
-
-    tiempo_fin_validacion_cruzada = time.time()
-    tiempo_validacion_cruzada = (tiempo_fin_validacion_cruzada
-                                 - tiempo_inicio_validacion_cruzada)
-
-    print(f'\nTiempo empleado para validación cruzada: {tiempo_validacion_cruzada}s\n')
-    
-    print('\n\nEl mejor modelo es: ', best_model)
-    print('E_val calculado en cross-validation: ', best_score)
-
     # Error cuadrático medio
     # predecimos test acorde al modelo
-    best_model.fit(x, y)
-    prediccion = best_model.predict(x)
-    prediccion_test = best_model.predict(x_test)
+    modelo.fit(x, y)
+    prediccion = modelo.predict(x)
+    prediccion_val = modelo.predict(x_val)
 
-    Etest=r2_score(y_test, prediccion_test)
+    Eval=r2_score(y_val, prediccion_val)
     Ein=r2_score(y, prediccion)
     print("E_in en entrenamiento: ",Ein)
-    print("E_test en test: ",Etest)
-
-    return best_model
+    print("E_val en validación: ",Eval)
   
-              
+    
+def GraficaError(num_estimadores, resultados):
+    plt.plot( num_estimadores, resultados['mean_test_score'], c = 'red', label='R2') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
+    plt.legend();
+    plt.title("Evolución del coeficiente R2 para n_estimators")
+    plt.xlabel('n_estimators')
+    plt.ylabel('R2')
+    plt.figure()
+    plt.show()
+
    
+def GraficaRegularizacion(E_in,E_val,alpha):
+    plt.plot( alpha, E_in, c = 'orange', label='E_in') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
+    plt.plot( alpha, E_val, c = 'blue', label='E_test') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
+    plt.legend();
+    plt.title("Influencia de la regularización en train y validación")
+    plt.xlabel('alpha')
+    plt.ylabel('R2')
+    plt.figure()
+    plt.show()
 #################################################################
 ###################### Modelos a usar ###########################
-k_folds=10 #Número de particiones para cross-Validation
 
 #Modelo: Random Forest aplicado a Regresión
 #Grid de Parámetros
 print('\nRandom Forest aplicado a Regresión \n')
+
+num_estimadores =[]
+for i in range(50,350,50):
+    num_estimadores.append(i)
+    
 parametros = {
-     'max_features' :['auto','sqrt'],
-    'n_estimators' : [50,100,150,200]
+     'max_features' :['sqrt'],
+    'n_estimators' : num_estimadores
     }
 
 
 modelo=RandomForestRegressor(random_state=0)
+
 MuestraResultadosVC(modelo,parametros, x_train, y_train)
+
+
 
 Parada("Pulse una tecla para continuar")
 
+
 print ("Ajustamos ahora con Outliers")
 
-MuestraResultadosVC(modelo,parametros, x_train_outliers_normalizado, y_train_con_outliers)
+resultados=MuestraResultadosVC(modelo,parametros, x_train_outliers_normalizado, y_train_con_outliers)
 
+#En esta gráfica vemos que el coeficiente R^2 es creciente
+GraficaError(num_estimadores,resultados)
+
+num_estimadores =[]
+for i in range(200,325,25):
+    num_estimadores.append(i)
+    
+parametros = {
+     'max_features' :['sqrt'],
+    'n_estimators' : num_estimadores
+    }
+
+resultados=MuestraResultadosVC(modelo,parametros, x_train_outliers_normalizado, y_train_con_outliers)
+
+#En esta gráfica vemos que el coeficiente R^2 parece alcanzar el máximo entre 260-290 estimadores
+GraficaError(num_estimadores,resultados)
+
+
+num_estimadores =[]
+for i in range(260,295,5):
+    num_estimadores.append(i)
+    
+parametros = {
+     'max_features' :['sqrt'],
+    'n_estimators' : num_estimadores
+    }
+
+resultados=MuestraResultadosVC(modelo,parametros, x_train_outliers_normalizado, y_train_con_outliers)
+
+#En esta gráfica vemos que el coeficiente R^2 es creciente
+GraficaError(num_estimadores,resultados)
+
+
+num_estimadores =[]
+for i in range(280,292,2):
+    num_estimadores.append(i)
+    
+parametros = {
+     'max_features' :['sqrt'],
+    'n_estimators' : num_estimadores
+    }
+
+resultados=MuestraResultadosVC(modelo,parametros, x_train_outliers_normalizado, y_train_con_outliers)
+
+#En esta gráfica vemos que el coeficiente R^2 es creciente
+GraficaError(num_estimadores,resultados)
+
+print("\n Veamos si hay Sobrajuste: ")
+
+x_entrenamiento, x_validacion, y_entrenamiento, y_validacion=train_test_split(
+    x_train_outliers_normalizado, y_train_con_outliers,
+    test_size= 0.2,
+    shuffle = True, 
+    random_state=1)
+
+modelo=RandomForestRegressor(max_features='sqrt',n_estimators=290,random_state=0)
+Evaluacion(modelo,x_entrenamiento,y_entrenamiento,x_validacion,y_validacion,'Random Forest')
+
+
+print("\n\nTratamos de reducir el sobreajuste: ")
+
+alpha =np.arange(0.0, 0.001, 0.0001).tolist()
+    
+for i in alpha:
+    print("\n alpha=",i)
+    modelo=RandomForestRegressor(max_features='sqrt',n_estimators=290,ccp_alpha=i, random_state=0)
+    Evaluacion(modelo,x_entrenamiento,y_entrenamiento,x_validacion,y_validacion,'Random Forest')
+
+
+E_in=[0.9531783709010848,0.8776642587554613,0.822134867592024,0.7791942044642272,0.7480678478671681,0.7251329558659247,0.7070096167353577,0.6934033698830031, 0.6827806319388955,0.6733809257943127]
+E_val=[0.6851165863802047,0.6828587662709389,0.6783327423991174,0.6700327984832091,0.6619702856867934,0.6550114680674126,0.6489352273229924,0.6426441681200656,0.6374229820589261,0.6321236114445636]
+
+GraficaRegularizacion(E_in,E_val,alpha)
+
+#El modelo final será con alpha=0.0006
