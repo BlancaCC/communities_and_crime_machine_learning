@@ -18,6 +18,7 @@ import pandas as pd
 # matemáticas
 # ==========================
 import numpy as np
+from math import floor 
 
 
 # lectura de datos
@@ -90,8 +91,8 @@ def Parada(mensaje = None):
     '''
     Hace parada del código y muestra un mensaje en tal caso 
     '''
-    #print('\n-------- fin apartado, enter para continuar -------\n')
-    input('\n-------- fin apartado, enter para continuar -------\n')
+    print('\n-------- fin apartado, enter para continuar -------\n')
+    #input('\n-------- fin apartado, enter para continuar -------\n')
     
     if mensaje:
         print('\n' + mensaje)
@@ -179,81 +180,6 @@ x_train, x_test, y_train, y_test = train_test_split(
 
 
 
-####  Comprobació balanceo de los datos
-
-
-def BalanceadoRegresion(y, divisiones = 20):
-    '''
-    INPUT: 
-    y: Etiquetas
-    divisiones: número de agrupaciones en las que dividir el rango de etiquetas
-
-    OUTPUTS: 
-    void
-    imprime en pantalla detalles y gráfica
- 
-    '''
-    min_y = min(y)
-    max_y = max(y)
-
-    longitud = (max_y - min_y)/divisiones    
-    extremo_inferior = min_y
-    extremo_superior = min_y + longitud
-
-    datos_en_rango = np.arange(divisiones)
-    cantidad_minima = np.infty
-    cantidad_maxima = - np.infty
-    indice_minimo = None
-    indice_maximo = None
-    
-    
-    for i in range(divisiones):
-        datos_en_rango[i] = np.count_nonzero(
-            (extremo_inferior <= y ) &
-            (y <= extremo_superior)
-        )
-        extremo_inferior = extremo_superior
-        extremo_superior += longitud
-
-        if cantidad_minima > datos_en_rango[i]:
-            cantidad_minima = datos_en_rango[i]
-            indice_minimo = i
-        if cantidad_maxima < datos_en_rango[i]:
-            cantidad_maxima = datos_en_rango[i]
-            indice_maximo = i
-
-    # imprimimos valores
-    print('\nDistribución de las etiquetas de y en rango valores de [%.4f, %.4f] \n'%(min_y, max_y))
-    
-    print('Número total de etiquetas ', len(y))
-    
-    print('Cantidad mínima de datos ', cantidad_minima)
-    extremo_inferior = min_y + longitud * indice_minimo
-    print(f'Alcanzada en intervalo [%.4f , %.4f]'%
-          (extremo_inferior , (extremo_inferior + longitud)))
-    
-    print('Cantidad máxima de datos ', cantidad_maxima)
-    extremo_inferior = min_y + longitud * indice_maximo
-    print(f'Alcanzada en intervalo [%.4f , %.4f]'%
-          (extremo_inferior , (extremo_inferior + longitud)))
-    print('La media de datos por intervalo es %.4f'% datos_en_rango.mean())
-    print('La desviación típica de datos por intervalos es %.4f' % datos_en_rango.std())
-    print('La mediana de y es %4.f' % np.median(y))
-    print('La media de datos %.4f'% y.mean())
-    print('La desviación típica de datos %.4f'% y.std())
-    
-    Parada('Gráfico de balanceo')
-    # gráfico  de valores
-    plt.title('Número de etiquetas por rango de valores')
-    plt.bar([i*longitud + min_y for i in range(len(datos_en_rango))],
-            datos_en_rango, width = longitud * 0.9)
-    plt.xlabel('Valor de la etiqueta y (rango de longitud %.3f)'%longitud)
-    plt.ylabel('Número de etiquetas')
-    plt.show()
-    
-# DESCOMENTAR
-#BalanceadoRegresion(y_train, divisiones = 25)
-
 
 ## quitamso outliers
 
@@ -308,8 +234,9 @@ def EliminaOutliers(y, proporcion_distancia_desviacion_tipica = 3.0):
 
 mascara_sin_outliers = EliminaOutliers(y_train, proporcion_distancia_desviacion_tipica = 3)
 
-#mantenemos copia para después compararlos  
-x_train_con_outliers = np.copy(x_train)
+#mantenemos copia para después compararlos
+
+x_train_con_outliers = np.copy(x_train) #Sin normalizar con outliers
 y_train_con_outliers = np.copy(y_train)
 
 x_train = x_train[mascara_sin_outliers]
@@ -319,7 +246,7 @@ y_train = y_train[mascara_sin_outliers]
 Parada('Normalizamos los datos')
 #Normalizamos los datos para que tengan media 0 y varianza 1
 
-x_train_sin_normalizar = np.copy(x_train)
+x_train_sin_normalizar = np.copy(x_train) # Sin normalizar sin outliers
 x_test_sin_normalizar = np.copy(x_test)
 
 scaler = StandardScaler()
@@ -342,7 +269,44 @@ print("\nVector y de etiquetas de entrenamiento sin outliers: ", y_train.shape)
 #######################################################################
 #
 #       Función para evaluar los distintos métodos
-#
+#def EvolucionDatosEntrenamiento(modelo,
+                                x, y,
+                                numero_particiones,
+                                porcentaje_validacion = 0.2):
+    '''
+    Dado un modelos muestra la evolución del Error in y Error out
+    En función del tamaño de entrenamiento 
+
+    INPUT:
+    modelo: modelo a ajustar
+    numero_particiones: numero natural positvo 
+    porcentaje_validacion: porcentaje de x_entrenamiento que se usará para validación  
+    x, y
+
+
+    OUTPUT
+    El error se calcula por live one out 
+    '''
+
+    # retiramos subconjunto para test, para no hacer data snopping
+    x_train, x_test, y_train, y_test = train_test_split(
+    x, y,
+    test_size= porcentaje_validacion,
+    shuffle = True, 
+    random_state=1)
+
+    incremento = ceil(len(y_train)/ numero_particiones)
+    
+    size_set_entrenamiento = [incremento*i for i in range(1,numero_particiones+1)]
+    error_in = list()
+    error_out = list()
+
+    for tam in size_set_entrenamiento:
+        #no considero necesario
+        
+        ajuste = clasificador.fit(x_train[:tam], y_train[:tam])
+
+        
 ##########################################################################
 
 
@@ -462,8 +426,10 @@ def MuestraResultadosVC( estimador, parametros, x_entrenamiento, y_entrenamiento
 
     print(' |Parámetros | $R^2$ medio | Desviación tipica $R^2$| Ranking | tiempo medio ajuste |      ')
     print('|---|---|---|---|---|    ')
+    
     for ranking, indice in rank_indice:
-        # imprimimos las caracterísitcas de los parámetros evaluados 
+        # imprimimos las caracterísitcas de los parámetros evaluados
+        print ('| ', end = '')
         for p in parametros:
             print ( p ,
                     getdata( grid.cv_results_['param_'+p])[indice], end = ' ')
@@ -476,5 +442,127 @@ def MuestraResultadosVC( estimador, parametros, x_entrenamiento, y_entrenamiento
         print( '{:.4f}'.format(grid.cv_results_['rank_test_score'][indice]),
                end = ' | ')
         print( '{:.4f}'.format(grid.cv_results_['mean_fit_time'][indice]),
-               end = '    \n')
+               end = '|     \n')
     
+
+
+
+
+########################################################################
+## Función de transformación de datos
+def TransformacionPolinomica( grado,x):
+    '''
+    Devuelve un vector con transformaciones polinómicas 
+    '''
+    x_aux = np.copy(x)
+    for i in range(1,grado):
+        x_aux = x_aux*x_aux
+        x = np.c_[x_aux, x]
+    return x
+
+
+
+####################################################
+# Comparativa de evolución del error frente tamaño de entrenamiento
+###################################################
+
+
+
+def TablasComparativasEvolucion (tam, ein, eout):
+    '''
+    Muestra dos tablas comparativas de la varación de los errores en función del tamaño de entrenamiento 
+    '''
+    Parada('Comarativas evolución error por tamaño muestra separadas')
+    plt.figure(figsize = (9,9))
+
+    plt.subplot(121)
+    plt.plot(tam,ein)
+    plt.title('Variación $R^2$ in')
+    plt.xlabel('Tamaño set entrenamiento')
+    plt.ylabel('$R^2$')
+
+    plt.subplot(122)
+    plt.plot(tam, eout)
+    plt.title('Variación $R^2$ out')
+    plt.xlabel('Tamaño set entrenamiento')
+    plt.ylabel('$R^2$')
+
+    plt.show()
+    
+
+    # juntos
+    Parada('Comarativas separadas')
+    plt.title('Comparativas $R^2$')
+    plt.plot(tam,ein, label = '$R^2$ in' )
+    plt.plot(tam, eout, label = '$R^2$ out' )
+
+    plt.xlabel('Tamaño set entrenamiento')
+    plt.ylabel('$R^2$')
+    plt.legend()
+    plt.show()
+    
+    
+    
+    
+def EvolucionDatosEntrenamiento(modelo,
+                                x, y,
+                                numero_particiones,
+                                porcentaje_validacion = 0.2):
+    '''
+    Dado un modelos muestra la evolución del Error in y Error out
+    En función del tamaño de entrenamiento 
+
+    INPUT:
+    modelo: modelo a ajustar
+    numero_particiones: numero natural positvo 
+    porcentaje_validacion: porcentaje de x_entrenamiento que se usará para validación  
+    x, y
+
+
+    OUTPUT
+    El error se calcula por live one out 
+    '''
+
+    # retiramos subconjunto para test, para no hacer data snopping
+    x_train, x_test, y_train, y_test = train_test_split(
+    x, y,
+    test_size= porcentaje_validacion,
+    shuffle = True, 
+    random_state=1)
+
+    incremento = floor(len(y_train)/ numero_particiones)
+    
+    size_set_entrenamiento = [incremento*i for i in range(1,numero_particiones+1)]
+    score_in = np.zeros( numero_particiones)
+    score_out = np.zeros( numero_particiones)
+
+    print('| Tamaño | $R^2$ in | $R^2$ out |    ')
+    print('|---'*3 , '|    ')
+    
+    for i,tam in enumerate(size_set_entrenamiento):
+        #no considero necesario
+        
+        modelo.fit(x_train[:tam], y_train[:tam])
+
+        score_in[i] = modelo.score(x_train[:tam], y_train[:tam])
+        score_out[i] = modelo.score(x_test, y_test)
+        print( '|{:.0f} | {:.4f} | {:.4f}'.format(
+            tam,
+            score_in[i],
+            score_out[i]
+        )
+               ,
+               end = '|     \n'
+            )
+
+    
+    TablasComparativasEvolucion (
+        size_set_entrenamiento,
+        score_in,
+        score_out
+        )
+
+        
+
+    
+
