@@ -409,21 +409,27 @@ def MuestraResultadosVC( estimador, parametros, x_entrenamiento, y_entrenamiento
 
 ############## Función para dibujar los resultados #########
 
-def GraficaError(parametros, resultados):
+def GraficaError(parametros, resultados, nombre_parametros = None):
     '''
     INPUT: 
     - parametros: lista con los parámetros con los que estamos probando
     - resutlados: varieble que almacena el grid.cv_results_, el output de la función MuestraResultadosVC
+    - nombre_parametro que poner en el título y leyenda
 
     OUTPUT: Void
     Muestra en pantalla la figura deseada
     '''
+    plt.clf()
     plt.plot( parametros, resultados['mean_test_score'], c = 'red', label='R2') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
-    plt.legend();
-    plt.title("Evolución del coeficiente R2 para n_estimators")
-    plt.xlabel('n_estimators')
+    if (nombre_parametros == None):
+        plt.title("Evolución del coeficiente R2")
+        plt.xlabel('Valores parámetros')
+    else:
+        plt.title(f'Evolución del coeficiente R2 {nombre_parametros}')
+        plt.xlabel(nombre_parametros)
+        
     plt.ylabel('R2')
-    plt.figure()
+    plt.legend()
     plt.show()
 
    
