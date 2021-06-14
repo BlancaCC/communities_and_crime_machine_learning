@@ -106,7 +106,7 @@ def Evaluacion_test( modelo, x, y, x_test, y_test, nombre_modelo):
     print("E_in en entrenamiento: ",Ein)
     print("E_test en test: ",Etest)
  
-  
+''' 
 def GraficaError(param, resultados,hiperparametro):
     plt.plot( param, resultados['mean_test_score'], c = 'red', label='R2') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
     plt.legend();
@@ -115,38 +115,32 @@ def GraficaError(param, resultados,hiperparametro):
     plt.ylabel('R2')
     plt.figure()
     plt.show()              
-   
+ '''  
 #################################################################
 ###################### Modelos a usar ###########################
-print('\nPrimer Modelo: SVM aplicado a Regresión con kernel polinómico\n')
+Parada('Primer Modelo: SVM aplicado a Regresión con kernel polinómico')
+
 parametros = {
-     'degree':[2],
-    #'gamma' : ['scale', 'auto']
-    #'C' : [0.1,0.2,0.5,1],
-    #'epsilon': [0.01,0.05,0.1,0.2]
+     'degree':[2]
     }
 
 
 modelo=SVR(kernel='poly')
 MuestraResultadosVC(modelo,parametros, x_train, y_train)
 
-Parada("Pulse una tecla para continuar")
-
-print ("Ajustamos ahora con Outliers")
+Parada('Ajustamos ahora con Outliers')
 
 MuestraResultadosVC(modelo,parametros, x_train_outliers_normalizado, y_train_con_outliers)
 
-Parada("Pulse una tecla para continuar")
+Parada(Segundo Modelo: SVM aplicado a Regresión con kernel RBF)
 
-print('\nSegundo Modelo: SVM aplicado a Regresión con kernel RBF\n')
 #Segundo Modelo: SVM aplicado a Regresión con kernel RBF
 #Hago un vector con modelos del mismo tipo pero variando los parámetros
 modelo=SVR(kernel='rbf')
 MuestraResultadosVC(modelo,parametros, x_train, y_train)
 
-Parada("Pulse una tecla para continuar")
+Parada("Ajustamos ahora con Outliers")
 
-print ("Ajustamos ahora con Outliers")
 MuestraResultadosVC(modelo,parametros, x_train_outliers_normalizado, y_train_con_outliers)
 
 
@@ -167,6 +161,7 @@ parametros = {
     'C' : C,
     }
 
+Parada()
 print("\n------------------SVM Kernel rbf------------------\n")
 resultados=MuestraResultadosVC(modelo2,parametros, x_train_outliers_normalizado, y_train_con_outliers)
 GraficaError(C,resultados,"C")
@@ -175,11 +170,12 @@ C =np.arange(0.1, 0.31, 0.01).tolist()
 parametros = {
     'C' : C,
     }
+Parada()
 print("\n------------------SVM Kernel rbf------------------\n")
 resultados=MuestraResultadosVC(modelo2,parametros, x_train_outliers_normalizado, y_train_con_outliers)
 GraficaError(C,resultados,"C")
 
-
+Parada()
 print("\n\nFinalmente ajustamos epsilon")
 modelo1=SVR(kernel='poly',degree=2,gamma='auto',C=0.28)
 e= [0.01,0.05,0.1,0.2]
@@ -187,6 +183,7 @@ parametros = {
     'epsilon':e
 }
 
+Parada()
 print("\n------------------SVM Kernel rbf------------------\n")
 resultados=MuestraResultadosVC(modelo2,parametros, x_train_outliers_normalizado, y_train_con_outliers)
 GraficaError(e,resultados,"epsilon")
@@ -196,12 +193,13 @@ e =np.arange(0.001, 0.051, 0.001).tolist()
 parametros = {
     'epsilon':e
 }
+Parada()
 print("\n------------------SVM Kernel rbf------------------\n")
 resultados=MuestraResultadosVC(modelo2,parametros, x_train_outliers_normalizado, y_train_con_outliers)
 GraficaError(e,resultados,"epsilon")
 
 
-
+Parada('Modelo final SVM con kernel RBF')
 modelo_definitivo=SVR(kernel='poly',degree=2,gamma='auto',C=0.28,epsilon=0.03)
 Evaluacion_test(modelo_definitivo, x_train_outliers_normalizado, y_train_con_outliers, x_test_outliers_normalizado, y_test, "SVR con Kernel rbf")
 
