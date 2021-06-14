@@ -77,7 +77,7 @@ def Evaluacion_test_modelos_lineales( modelo, x, y, x_test, y_test, nombre_model
     print("E_test en validación: ",Etest)
     
     
-      
+''' BORRAR     
 def GraficaError(param, resultados, Hiperparametro):
     plt.plot( param, resultados['mean_test_score'], c = 'red', label='R2') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
     plt.legend();
@@ -86,7 +86,7 @@ def GraficaError(param, resultados, Hiperparametro):
     plt.ylabel('R2')
     plt.figure()
     plt.show()
-      
+'''     
   
 Parada('Pulsa una tecla para continuar')
 #################################################################
