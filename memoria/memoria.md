@@ -30,7 +30,6 @@ header-includes:
 |- main.py
 |- datos
     |-- communities.data
-    |-- communities.names
 
 ```
 
@@ -40,21 +39,43 @@ header-includes:
     - 8 gigas de ram.  
 
 
+Los datos han sido obtenidos de     
+
+https://archive.ics.uci.edu/ml/datasets/communities+and+crime
+
+
+
 
 ## Descripción del problema   
 
-Los datos han sido obtenidos de 
-https://archive.ics.uci.edu/ml/datasets/communities+and+crime
+Estamos ante un problema de regresión (aprendizaje supervisado) donde 
+se pretende determinar el número total de crímenes violentos por cada $10^5$ habitantes  
 
-Se pretende determinar el número total de crímenes violentos por cada $10^5$ habitantes.  
+ Esta vez se trata de 1994 instancias que recogen información diversa (raza, renta per cápita, divorciados...) sobre la población de regiones de Estados Unidos, 
+  
+Los datos que nos da están normalizado, por lo que consideramos la matriz de característica $\mathcal X = [0, 1]^{122}$,
+el vector de etiquetas $\mathcal Y = [0, 1]$
+y queremos aprender una función $f:\mathcal X \to \mathcal Y$ que asigne a cada ejemplo la cantidad (normalizada) de crímenes violentos que se producen por cada $100.000$ habitantes.
 
-Las atiquetas aportadas son en total 122 predictivas, 5 no predictivas y una objetivo.  Para leerlas de forma explícita consultar [Attribute Information del apéndice](#attribute-information).  
 
 
+### Enfoque elegido para resolver el problema  
+
+- Preprocesado de datos (eliminar etributos perdidos, quitar outliers, normalización).  
+- Intenteto de resulción mediante modelo lineal. 
+- E intentamos modelos no lineales (SVM, random forest, boosting, MLP).
+
+## Interés de la variable  
+
+Las atiquetas aportadas son en total 122 predictivas, 5 no predictivas (state, county, community, communityname y fold) y una objetivo (ViolentCrimesPerPop).  Para leerlas de forma explícita consultar [Attribute Information del apéndice](#attribute-information).  
+
+
+Buscando los mejores hiperparámetros.  
 
 ## Codificación de los datos de entrada  
 
 Para leer los datos nos enfrentamos a dos problemas:  
+
 - Existencia de atributos nominales y no predictivos.  
 - Hay pérdida de datos.  
 
@@ -114,7 +135,10 @@ def EliminaOutliers(y, proporcion_distancia_desviacion_tipica = 3.0):
 
 ## Normalizamos los datos  
 
-Procedemos también a tipificar los datos. Esto nos va a dar algunas ventajas como reducir la gran diferencia de escala entre los valores de los atributos manteniendo las diferencias.
+Nos dicen que todos los datos están normalizados al intervalo $[0, 1]$, pero por preprocesados anteriores como haber eliminado outliers es necesario 
+tipificar.  
+
+El interés de esto es que algunos de los modelos utilizados son sensibles al escalado de los datos y se recomienda en su documentació normalizarlos primero.  
 
 Exiten diferentes métodos de transformación (z-score, min-max, logística...), nosotros hemos optado por el Z-score. [@tificiacionMicrosoft] Que consiste en una transformación de la variable aleatoria $X$ a otra, $Z$ de media cero y varianza uno. $$Z = \frac{ x - \bar{x}}{\sigma}$$
 
@@ -155,6 +179,12 @@ Como podemos observar, de las 122 características posibles que tenía nuestra m
 Por otra parte, en el proceso de eliminar outliers (como se puede ver en el número de filas) se eliminan un total de 39 filas.  
 
 
+
+- SVM con kernel lineal  
+- Random forest  
+-  
+
+
 ## Métrica de error  
 
 Para este problema vamos a utilizar el coeficiente de determinación $R^2$ para analizar la bondad de un ajuste. 
@@ -171,6 +201,135 @@ Cabe destacar que aunque teóricamente el valor está acotado, por le método de
 de scikit learn, existen caso en que es arbitrariamente peor.  En estos casos nosotros hemos optado por plasmar 
 ese cálculo negativo en la memoria, pero a nivel teórico se considerará que el modelo no explica nada, es decir 
 que $R^2 = 0$.  
+
+
+\newpage   
+
+# Modelo Lineal: SVM aplicado a Regresión con Kernel Lineal.
+
+Hemos optado por usar este modelo lineal implementado en la clase `LinearSVR` de `sklearn` usando como función de pérdida la de epsilon_insensitive (que explicaremos más adelante). Una vez entrenado el modelo, como en todos los modelos siguientes, usaremos el coeficiente de determinación $R^2$ para determinar la bondad del ajuste.
+
+No vamos reducir la dimensionalidad del problema, ya que no lo vimos oportuno por el poco número de características y por la información que se podía perder. Finalmente comentar que usaremos los datos normalizados y sin Outliers, además haremos una transformación polinómica a la matriz de entrenamiento para añadir características cuadráticas.
+
+## Estimación de Parámetros
+
+**Nota:**Este proceso es costoso computacionalmente hablando, y por esto el código se encuentra comentado, para comprobar los valores que se describen aquí abajo descomentar el código: 
+
+
+En este modelo solo vamos a estimar el hiperparámetro **epsilon** y **C**, el primero determina la anchura del pasillo en torno al estimador y *C* es el término de regularización, ambos se usan en la función de error (epsilon_insensitive). El resto de parámetros los mantendremos por defecto. Así los resultados que obtenemos son los siguientes: 
+
+
+Parámetro C: 
+
+El valor por defecto es 1, así que vamos a tomar valores entorno al 1, como son el 0.5, 1, 1.5 y 2. 
+
+Mejores parámetros:  {'C': 0.5}
+
+Con una $R^2$ de:  0.5888467272010589 
+
+Table: Tabla para el parametro C
+
+| Parámetros | $R^2$ medio | Ranking | tiempo medio ajuste |
+|------------|-------------|---------|---------------------|
+| C 0.5      | 0.5888      | 1       | 34.0404             |
+| C 1        | 0.5689      | 2       | 35.6532             |
+| C 1.5      | 0.5455      | 3       | 34.6849             |
+| C 2        | 0.5210      | 4       | 20.8280             |
+
+-----------------------------------------------------
+![](./imagenes/ModeloLineal/Grafica_C1.png)
+
+-----------------------------------------------------
+
+Como podemos observar el máximo parece estar antes del 0.5, por eso vamos a probar entre 0.1 y 0.5 con pasos de 0.1: 
+
+Mejores parámetros:  {'C': 0.1}
+Con una $R^2$ de:  0.5932866031483144 
+
+Table: Tabla para el parametro C
+
+| Parámetros | $R^2$ medio | Ranking | tiempo medio ajuste |
+|------------|-------------|---------|---------------------|
+| C 0.1      | 0.5933      | 1       | 29.1086             |
+| C 0.5      | 0.5888      | 2       | 25.9276             |
+| C 0.2      | 0.5845      | 3       | 30.6160             |
+| C 0.3      | 0.5840      | 4       | 31.5158             |
+| C 0.4      | 0.5722      | 5       | 31.6116             |
+
+-----------------------------------------------------
+![](./imagenes/ModeloLineal/Grafica_C2.png)
+
+-----------------------------------------------------
+
+Así, como podemos ver el máximo se alcanza en 0.1, y será ese el valor que tomemos para C
+
+
+Pasamos ahora a estudiar el parámetro $\epsilon$:
+
+En primero como el valor por defecto es 0, vamos a tomar estos valores: 0.0,0.1,0.2,0.3.
+
+Mejores parámetros:  {'epsilon': 0.0}
+Con una $R^2$ de:  0.56890579922534 
+
+ | Parámetros  | $R^2$ medio | Ranking | tiempo medio ajuste |
+ |-------------|-------------|---------|---------------------|
+ | epsilon 0.0 | 0.5689      | 1       | 33.0511             |
+ | epsilon 0.1 | 0.5607      | 2       | 24.7232             |
+ | epsilon 0.2 | 0.3734      | 3       | 8.7525              |
+ | epsilon 0.3 | 0.2636      | 4       | 0.2419              |
+
+
+-----------------------------------------------------
+![](./imagenes/ModeloLineal/Grafica_epsilon1.png)
+
+-----------------------------------------------------
+
+Como vemos la gráfica es decreciente, lo que nos hace pensar que para este modelo lo mejor es que el pasillo sea prácticamente con $\epsilon=0$. No obstante vamos a probar con algunos valores entre 0 y 0.1, como son 0.03,0.06 y 0.09: 
+
+Mejores parámetros:  {'epsilon': 0.03}
+
+Con una $R^2$ de:  0.5914477460146103 
+
+Table: Parámetro $\epsilon$
+
+| Parámetros   | $R^2$ medio | Ranking | tiempo medio ajuste |
+|--------------|-------------|---------|---------------------|
+| epsilon 0.03 | 0.5914      | 1       | 35.6540             |
+| epsilon 0.06 | 0.5853      | 2       | 35.3626             |
+| epsilon 0.09 | 0.5764      | 3       | 18.8831             |
+| epsilon 0.0  | 0.5689      | 4       | 34.6573             |
+
+
+-----------------------------------------------------
+![](./imagenes/ModeloLineal/Grafica_epsilon2.png)
+
+-----------------------------------------------------
+
+Como vemos, el máximo se alcanza en $\epsilon =0.03$ luego este será el valor que usemos para nuestro modelo. Tras esto aplicamos nuestro modelo al conjunto de datos de test obteniendo los siguientes resultados: 
+
+```
+------------------------------------------------------------
+ Evaluando SVM aplicado a Regresión
+------------------------------------------------------------
+E_in en entrenamiento:  0.6872076565729107
+E_test en validación:  0.6252723796692914
+```
+
+## Función Pérdida y Regularización
+
+En nuestro caso, el objetivo es minimizar el siguiente problema primal: 
+
+-----------------------------------------------------
+![](./imagenes/ModeloLineal/error_LinearSVM.png)
+
+-----------------------------------------------------
+
+como hemos comentado, solo computan aquellos errores fuera del pasillo marcado por $\epsilon$, y C es el término de regularización.
+
+Los mejores hiperparámetros encontrados han sido
+caso C=0.1 y $\epsilon=0.03$.  
+
+
 
 # Apéndice  
 

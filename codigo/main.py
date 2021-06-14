@@ -7,7 +7,10 @@
 #   Fecha: Principios junio 2021
 ####################################################
 
-
+## Estructura del fichero
+# - Biblioteca
+# - Funciones generales
+# - Modelos 
 #############################
 #######  BIBLIOTECAS  #######
 #############################
@@ -27,11 +30,9 @@ from pandas import read_csv
 
 # Modelos lineales de clasificación a usar   
 # =========================================
-from sklearn.linear_model import LinearRegression
-from sklearn.linear_model import Ridge
-from sklearn.linear_model import Lasso
 from sklearn.svm import SVR
-from sklearn.linear_model import SGDRegressor
+from sklearn.svm import LinearSVR
+
 
 # Modelos no lineales a usar
 # =============================================
@@ -633,9 +634,104 @@ def ConclusionesFinales( modelo,
     if mostrar_coeficientes:
         print( modelo.coef_)
 
-    
-    
-        
 
+def Evaluacion_test_modelos_lineales( modelo, x, y, x_test, y_test, nombre_modelo):
+    '''
+    Función para calcular error en entrenamiento y test  
+    INPUT:
+    - modelo: Modelo con el que calcular los errores
+    - X datos entrenamiento. 
+    - Y etiquetas de los datos de entrenamiento
+    - x_val, y_val conjunto de entrenamiento y etiquetas de validación
+    '''
+
+    ##########################
+    
+    print('\n','-'*60)
+    print (f' Evaluando {nombre_modelo}')
+    print('-'*60)
+    # Error cuadrático medio
+    # predecimos test acorde al modelo
+    modelo.fit(x, y)
+    prediccion = modelo.predict(x)
+    prediccion_test = modelo.predict(x_test)
+
+    Etest=r2_score(y_test, prediccion_test)
+    Ein=r2_score(y, prediccion)
+    print("E_in en entrenamiento: ",Ein)
+    print("E_test en validación: ",Etest)       
+    
     
 
+#########################################################################################################################################################
+#########################################################################################################################################################
+#########################################################################################################################################################
+#########################################################################################################################################################
+#########################################################################################################################################################
+#########################################################################################################################################################
+    
+#                         MODELOS
+
+
+#########################################################################################################################################################
+#########################################################################################################################################################
+#########################################################################################################################################################
+#########################################################################################################################################################
+#########################################################################################################################################################
+#########################################################################################################################################################
+
+
+  
+Parada('Modelo: Regresión lineal con SVM')
+#################################################################
+###################### Modelos a usar ###########################
+print('Esta parte tiene un costo computacional elevado y ha sido comentada')
+'''
+#Modelo: Regresión Lineal con SVM
+#Sin Outliers
+modelo=LinearSVR(random_state=0, max_iter=15000)
+x_entrenamiento=TransformacionPolinomica(2,x_train)
+
+
+print("Ajustamos el término de regularización C")
+C=[0.5,1,1.5,2]
+parametros = {
+     'C' : C
+    }
+
+resultados=MuestraResultadosVC(modelo,parametros, x_entrenamiento, y_train)
+GraficaError(C,resultados,'C')
+
+C=[0.1,0.2,0.3,0.4,0.5]
+parametros = {
+     'C' : C
+    }
+
+resultados=MuestraResultadosVC(modelo,parametros, x_entrenamiento, y_train)
+GraficaError(C,resultados,'C')
+
+e=[0.0,0.1,0.2,0.3]
+parametros = {
+     'epsilon' : e
+    }
+
+resultados=MuestraResultadosVC(modelo,parametros, x_entrenamiento, y_train)
+GraficaError(e,resultados,'epsilon')
+
+print("Probamos epsilon entre 0 y 0.9")
+e=[0.0,0.03,0.06,0.09]
+parametros = {
+     'epsilon' : e
+    }
+
+resultados=MuestraResultadosVC(modelo,parametros, x_entrenamiento, y_train)
+GraficaError(e,resultados,'epsilon')
+'''
+
+Parada('Modelo final lineal')
+x_entrenamiento=TransformacionPolinomica(2,x_train)
+
+modelo=LinearSVR(epsilon=0.03, C=0.1,random_state=0, max_iter=15000)
+
+x_test_polinomios=TransformacionPolinomica(2,x_test)
+Evaluacion_test_modelos_lineales( modelo, x_entrenamiento, y_train, x_test_polinomios, y_test,'SVM aplicado a Regresión')
