@@ -779,7 +779,7 @@ Evaluacion_test_modelos_lineales( modelo, x_entrenamiento, y_train, x_test_polin
 
 #Modelo: Random Forest aplicado a Regresión
 #Grid de Parámetros
-''' DESCOMENTAR
+
 Parada('\nRandom Forest aplicado a Regresión \n')
 
 num_estimadores =[]
@@ -796,9 +796,9 @@ modelo=RandomForestRegressor(random_state=0)
 
 MuestraResultadosVC(modelo,parametros, x_train, y_train)
 
-'''# DESCOMENTAR
+
 #------------------- Ajuste con outliers --------------------------------
-'''# DESCOMENTAR
+
 Parada('Ajustamos ahora con Outliers')
   
 
@@ -888,10 +888,10 @@ E_val=[0.6851165863802047,0.6828587662709389,0.6783327423991174,0.67003279848320
 
 GraficaRegularizacion(E_in,E_val,alpha)
 Parada()
-'''# DESCOMENTAR
+
 #El modelo final será con alpha=0.0006
 MODELO_RANDOM_FOREST=RandomForestRegressor(max_features='sqrt',n_estimators=290,ccp_alpha=0.0006, random_state=0)
-'''# DESCOMENTAR
+
 importancias=Evaluacion_test_randomforest(MODELO_RANDOM_FOREST,x_train_outliers_normalizado,y_train_con_outliers,x_test_outliers_normalizado,y_test,'Random Forest')
 #Evaluacion(MODELO_RANDOM_FOREST,x_train_con_outliers,y_train_con_outliers,x_test,y_test,'Random Forest')
 
@@ -1055,12 +1055,12 @@ resultados_4 = MuestraResultadosVC(
     y_train
     
 )
-'''# DESCOMENTAR
+
 ''' Comento porque tiene poco sentido mostrar esta gráfica
 Parada( 'Muestro gráfico comparación número de iteraciones')
 GraficaError( maximas_iteraciones, resultados_4)
 '''
-'''# DESCOMENTAR
+
 # ------- tras todo esto el modelo seleccionado por cross validation es ---
 
 MLP_mejor = MLPRegressor(
@@ -1078,7 +1078,7 @@ MLP_mejor = MLPRegressor(
 # añadir función de evaluación de errores   
 
 Parada( 'MEJOR RESULTADO PARA MLP')
-'''# DESCOMENTAR
+
 print('''Los hiperparámetros seleccionados han sido:  
     random_state=1,
     shuffle = True,
@@ -1092,7 +1092,7 @@ print('''Los hiperparámetros seleccionados han sido:
 ''')
 
 
-'''# DESCOMENTAR
+
 ConclusionesFinales( MLP_mejor,
                      x_train,
                      y_train,
@@ -1115,7 +1115,10 @@ parametros = {'strategy':['mean', 'median']}
 
 MuestraResultadosVC( dummy_regr, parametros, x_train, y_train)
 
-'''# DESCOMENTAR
+Parada()
+
+print('El e_out calculados con leaveOneOut se comenta, por coste computacional.')
+print('El resultado es: E_out = 0.5745 ')
 
 ''' Tarda un par de mínutos en ejecutarse, ya que calculamos 
 el EOUT a partir de leaveCincuentaOut (una versión de leaveOneOut pero con 50)
@@ -1130,9 +1133,8 @@ ConclusionesFinales( MODELO_RANDOM_FOREST,
 
 '''
 #######################################################
-#
-                
- #               SVM
+#                
+#               SVM
 ########################################################
 #################################################################
 ###################### Modelos a usar ###########################
