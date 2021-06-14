@@ -23,8 +23,27 @@ header-includes:
 # Communities and Crime Data Set 
 
 
+## Consideraciones previas  
+
+- Para ejecutar el problema la estructura de fichero debe de ser la siguiente:  
+```
+|- main.py
+|- datos
+    |-- communities.data
+    |-- communities.names
+
+```
+
+- Todos los tiempos que se muestren estarán en segundos.
+- Las prestaciones del equipo en que han sido medidas son:   
+    - Procesador Intel core i5 de las séptima generación.  
+    - 8 gigas de ram.  
+
+
+
 ## Descripción del problema   
 
+Los datos han sido obtenidos de 
 https://archive.ics.uci.edu/ml/datasets/communities+and+crime
 
 Se pretende determinar el número total de crímenes violentos por cada $10^5$ habitantes.  
@@ -35,14 +54,14 @@ Las atiquetas aportadas son en total 122 predictivas, 5 no predictivas y una obj
 
 ## Codificación de los datos de entrada  
 
-Para leer los datos nos enfrentamos a dos problemas:
+Para leer los datos nos enfrentamos a dos problemas:  
 - Existencia de atributos nominales y no predictivos.  
 - Hay pérdida de datos.  
 
 ### Atributos no predictivos y nominales  
 
 
-Atendiendo a [Attribute Information](#attribute-information) tenemos que los cinco primeros atributos son no predicctivos, luego los eliminamos directamente.  
+Atendiendo a [Attribute Information](#attribute-information) tenemos que los cinco primeros atributos son no predicctivos, luego los eliminamos directamente en el programa de las prácticas.  
 
 El resto de valores son decimales, luego los procesamos sin problema.   
 
@@ -50,6 +69,8 @@ El resto de valores son decimales, luego los procesamos sin problema.
 <!--Categorías: https://www.kdnuggets.com/2021/05/deal-with-categorical-data-machine-learning.html -->
 
 ### Pérdida de datos  
+
+Como se indica en la documentación hay datos perdidos, cierta cantidad de datos perdidos en un mismo atributo da lugar a que esta sea de poca utilidad. 
 
 Aplicamos el critero dado en el guión, eliminamos los atributos que tengan una pérdida mayor o igual del $20\%$, para el resto los completamos con la media de valores válidos de ese atributo más un valor aleatorio dentro del intervalo $[-1.5 \sigma, 1.5 \sigma ]$ siendo $\sigma$ la desviación típica de la variable dicha.  
 
@@ -62,9 +83,7 @@ Utilizamos la separación clásica: $20\%$ de los datos para test y el resto par
 
 ## Eliminación de valores atípicos  
 
-Vamos consenvar los datos dentro de un intervalo de cnfianza del 0.997, para eliminar posibles ruidos.  
-
-( ¿ESTO HABRÍA QUE AMPLIARLO? ¿CÓMO LO VES? )   
+Vamos consenvar los datos dentro de un intervalo de confianza del 0.997, para eliminar posibles ruidos.  
 
 La función utilizada para esto ha sido   
 
@@ -90,16 +109,12 @@ def EliminaOutliers(y, proporcion_distancia_desviacion_tipica = 3.0):
     3.090     | 0.998
     4         | 0.9999367
     5         | 0.99999942
-    
-    
-
-    https://es.wikipedia.org/wiki/Distribuci%C3%B3n_normal#Desviaci%C3%B3n_t%C3%ADpica_e_intervalos_de_confianza
     '''
 ```
 
 ## Normalizamos los datos  
 
-Procedemos también a tificar los datos. Esto nos va a dar algunas ventajas como reducier la gran diferencia de escala en los valores manteniendo las difrencias.
+Procedemos también a tipificar los datos. Esto nos va a dar algunas ventajas como reducir la gran diferencia de escala entre los valores de los atributos manteniendo las diferencias.
 
 Exiten diferentes métodos de transformación (z-score, min-max, logística...), nosotros hemos optado por el Z-score. [@tificiacionMicrosoft] Que consiste en una transformación de la variable aleatoria $X$ a otra, $Z$ de media cero y varianza uno. $$Z = \frac{ x - \bar{x}}{\sigma}$$
 
@@ -111,38 +126,51 @@ La necesidad de estos método es normalizar a partir de los datos de entrenamien
 
 ## Reducción de dimensión PAC  
 
-ALEX: No creo que esto mejore el ajuste, pero sí que puede mejorar los tiempos.  
-Si eso lo implementamos más adelantes, si nos sobra tiempo   
+Las ventajas que nos puede aplicar una reducción PAC es a nivel computacional o para poder visualizar los datos. Puesto que nuestro data set es de tamaño razonable no consideramos conveniente su utilización ya que solo nos restaría en bondad del ajuste.  
+
+Tampoco creemos que nos vaya a aportar ninguna ventaja la visualización de los datos por T-SNE, es por ello que prescindimos de ella también.  
 
 ### Procesado aplicado a los datos  
 
 Acabamos el prepocesado con los siguientes posibilidades para conjunto de entrenamiento:   
 
 - `x_train` : Sin autliers, normalizado.
-- `x_train_sin_normalizarn`: sin outliers, normalizado.   
+- `x_train_sin_normalizado`: sin outliers, normalizado.   
 - `x_train_outliers_normalizado`: con outliers, normalizado.  
 - `x_train_con_outliers`: con outliers, sin normalizar.  
 
 Si nos fijamos en la dimensión de la matriz de características x dependiendo de la transformación utilizada podemos observar lo siguiente: 
 
-```python
+Table: Dimensiones obtenidas en X trans preprocesado de los datos  
+ 
+| Datos                  | dimensión   |
+| ---                    | ---         |
+| `x_train`              | (1556, 100) |
+| `x_train_con_outliers` | (1595, 100) |
 
-Dimensiones de los datos con las distintas transformaciones: 
 
-
-Matriz x de características de entrenamiento con outliers sin normalizar:  (1595, 100)
-
-Vector y de etiquetas de entrenamiento con outliers:  (1595,)
--------------------------------------------------------------------------------------
-
-Matriz x de características de entrenamiento sin outliers normalizada:  (1556, 100)
-
-Vector y de etiquetas de entrenamiento sin outliers:  (1556,)
-```
 
 Como podemos observar, de las 122 características posibles que tenía nuestra matriz x de entrenamiento en un principio, como 5 no son predictivos y la última columna son las etiquetas correspondientes a cada fila, el conjunto de atributos se nos queda en 116. Después, tras la gestión de atributos perdidos se eliminaron 16 atributos (pues tenían más de un 20% de valores perdidos), quedándose así un total de 100 características que utilizaremos para entrenar nuestros modelos.
 
-Por otra parte, en el proceso de eliminar outliers (como se puede ver en el número de filas) se eliminan un total de 39 filas.
+Por otra parte, en el proceso de eliminar outliers (como se puede ver en el número de filas) se eliminan un total de 39 filas.  
+
+
+## Métrica de error  
+
+Para este problema vamos a utilizar el coeficiente de determinación $R^2$ para analizar la bondad de un ajuste. 
+
+El motivo principal es que se encuntra acotado en el intervalo $[0,1]$ siendo uno el mejor ajuste posible.  
+
+Esta métrica se calcula de la siguiente manera:  
+
+$$R^2 (y, \hat{y}) = 1 - \frac{ \sum_{i=1}^{n} (y_i - \hat{y_i})^2}{ \sum_{i=1}^{n} (y_i - \bar{y})^2}$$  
+
+Donde $\bar{y} = \frac{1}{n} \sum_{i=1}^{n} y_i$  
+
+Cabe destacar que aunque teóricamente el valor está acotado, por le método de cálculo de la propia biblioteca
+de scikit learn, existen caso en que es arbitrariamente peor.  En estos casos nosotros hemos optado por plasmar 
+ese cálculo negativo en la memoria, pero a nivel teórico se considerará que el modelo no explica nada, es decir 
+que $R^2 = 0$.  
 
 # Apéndice  
 
