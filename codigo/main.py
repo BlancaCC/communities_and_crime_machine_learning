@@ -91,11 +91,13 @@ def Parada(mensaje = None):
     '''
     Hace parada del código y muestra un mensaje en tal caso 
     '''
-    print('\n-------- fin apartado, enter para continuar -------\n')
-    #input('\n-------- fin apartado, enter para continuar -------\n')
+    #print('\n-------- fin apartado, enter para continuar -------\n\n')
+    input('\n-------- fin apartado, enter para continuar -------\n\n')
     
     if mensaje:
-        print('\n' + mensaje)
+        print('-'*40)
+        print('\n' + mensaje )
+        print('-'*40)
 
 
         
@@ -432,10 +434,35 @@ def GraficaError(parametros, resultados, nombre_parametros = None):
     plt.legend()
     plt.show()
 
-   
-def GraficaRegularizacion(E_in,E_val,alpha):
-    '''TODO ALEX, explica tú esto
+
+
+def GraficaComparativaEinEval( ejex, E_in,E_val, etiqueta):
     '''
+    INPUT:
+    - ejex: parámetro que deseamos comparar
+    - E_in , E_val: lista de los respectivos errores
+    - etiqueta: string con el nombre de lo que estamos comparando
+    '''
+    plt.clf()
+    plt.plot( ejex, E_in, c = 'orange', label='$E_{in}$') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
+    plt.plot( ejex, E_val, c = 'blue', label='$E_{val}$') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
+    plt.legend();
+    plt.title(f'Influencia de {etiqueta}  en train y validación')
+    plt.xlabel(etiqueta)
+    plt.ylabel('R2')
+    plt.show()
+
+def GraficaRegularizacion(E_in,E_val,alpha):
+    '''Alex, lo siento pero es que la necesitaba más general
+    '''
+    GraficaComparativaEinEval( alpha, E_in,E_val, 'regularización')
+
+
+    
+'''   
+def GraficaRegularizacion(E_in,E_val,alpha):
+   #TODO ALEX, explica tú esto
+  xs
     plt.plot( alpha, E_in, c = 'orange', label='E_in') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
     plt.plot( alpha, E_val, c = 'blue', label='E_test') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
     plt.legend();
@@ -444,7 +471,7 @@ def GraficaRegularizacion(E_in,E_val,alpha):
     plt.ylabel('R2')
     plt.figure()
     plt.show()
-
+`'''
 ########################################################################
 ## Función de transformación de datos
 def TransformacionPolinomica( grado,x):
@@ -465,37 +492,42 @@ def TransformacionPolinomica( grado,x):
 
 
 
-def TablasComparativasEvolucion (tam, ein, eout):
+def TablasComparativasEvolucion (tam, ein, e_val, dos_separadas = True):
     '''
-    Muestra dos tablas comparativas de la variación 
+    Muestra gráficas comparativas de la variación 
 de los errores en función del tamaño de entrenamiento.
+
+    - Si dos_separadas es True se muestra también la variación de los valores separados.
+    - si no solo una.
 
     Esta función se utiliza exclusivamente en la función: 
     EvolucionDatosEntrenamiento 
     '''
-    Parada('Comarativas evolución error por tamaño muestra separadas')
-    plt.figure(figsize = (9,9))
 
-    plt.subplot(121)
-    plt.plot(tam,ein)
-    plt.title('Variación $R^2$ in')
-    plt.xlabel('Tamaño set entrenamiento')
-    plt.ylabel('$R^2$')
+    if dos_separadas:
+        Parada('Comarativas evolución error por tamaño muestra separadas')
+        plt.figure(figsize = (9,9))
 
-    plt.subplot(122)
-    plt.plot(tam, eout)
-    plt.title('Variación $R^2$ out')
-    plt.xlabel('Tamaño set entrenamiento')
-    plt.ylabel('$R^2$')
+        plt.subplot(121)
+        plt.plot(tam,ein)
+        plt.title('Variación $R^2$ $E_{in}$')
+        plt.xlabel('Tamaño set entrenamiento')
+        plt.ylabel('$R^2$')
 
-    plt.show()
+        plt.subplot(122)
+        plt.plot(tam, e_val)
+        plt.title('Variación $R^2$ $E_{eval}$')
+        plt.xlabel('Tamaño set entrenamiento')
+        plt.ylabel('$R^2$')
+
+        plt.show()
     
 
     # juntos
     Parada('Comarativas separadas')
     plt.title('Comparativas $R^2$')
-    plt.plot(tam,ein, label = '$R^2$ in' )
-    plt.plot(tam, eout, label = '$R^2$ out' )
+    plt.plot(tam,ein, label = '$R^2$ $E_{in}$' )
+    plt.plot(tam, e_val, label = '$R^2$ $E_{val}$' )
 
     plt.xlabel('Tamaño set entrenamiento')
     plt.ylabel('$R^2$')
@@ -508,7 +540,8 @@ de los errores en función del tamaño de entrenamiento.
 def EvolucionDatosEntrenamiento(modelo,
                                 x, y,
                                 numero_particiones,
-                                porcentaje_validacion = 0.2):
+                                porcentaje_validacion = 0.2,
+                                dos_separadas = True):
     '''
     Dado un modelos muestra la evolución del Error in y Error out
     En función del tamaño de entrenamiento 
@@ -524,7 +557,7 @@ def EvolucionDatosEntrenamiento(modelo,
     validación. 
 
     Las tablas que muestra depende de las definidas en la función 
-    TablasComparativasEvolucion (tam, ein, eout)
+    TablasComparativasEvolucion (tam, ein, eval)
     '''
 
     # retiramos subconjunto para test, para no hacer data snopping
@@ -540,7 +573,7 @@ def EvolucionDatosEntrenamiento(modelo,
     score_in = np.zeros( numero_particiones)
     score_out = np.zeros( numero_particiones)
 
-    print('| Tamaño | $R^2$ in | $R^2$ out |    ')
+    print('| Tamaño | $R^2$ $E_{in}$ | $R^2$ $E_{eval}$ |    ')
     print('|---'*3 , '|    ')
     
     for i,tam in enumerate(size_set_entrenamiento):
@@ -563,9 +596,45 @@ def EvolucionDatosEntrenamiento(modelo,
     TablasComparativasEvolucion (
         size_set_entrenamiento,
         score_in,
-        score_out
+        score_out,
+        dos_separadas
         )
 
+
+#######################################################
+# Resultado finales de la selección final del modelo
+#######################################################
+
+def ConclusionesFinales( modelo,
+                         x_train, y_train,
+                         x_test, y_test,
+                         mostrar_coeficientes = True):
+
+    
+    modelo.fit(x_train,y_train)
+
+    E_in = modelo.score(x_train,y_train)
+    E_test = modelo.score(x_test,y_test)
+
+    # Entrenamos con todos los datos y devolvemos coeficientes:
+    x = np.append(x_train, x_test).reshape(len(x_train) + len(x_test),
+                                      len(x_train[0]))
+    y = np.append(y_train, y_test)
+
+    modelo.fit(x,y)
+    E_in_total = modelo.score(x,y)
+
+    # Imprimimos resultados
+    print('R^2_in : {:.4f} , R^2_test :{:.4f}'.format(
+        E_in, E_test ) )
+    print('Tras entrenar con todos los datos: R^2_in : {:.4f} '.format(E_in_total))
+
+
+    if mostrar_coeficientes:
+        print( modelo.coef_)
+
+    
+    
         
 
     

@@ -11,28 +11,17 @@ from sklearn.neural_network import MLPRegressor
 # https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPRegressor.html
 
 
-k_folds = 5
-metrica_error = 'r2'
 
-TAMANOS_CAPAS = [100]#[50, 75, 100]
-METODOS = ['adam']#['adam', 'sgd']
-ALPHAS = [0.1]#[0.0001, 0.001, 0.1, 1]
-LEARNING_RATES = ['constant'] #['constant', 'invscaling', 'adaptive'] # se paran en el mismo error
-
-
-
-
-Parada(' ____ Estudio preliminar de los parámetros (tarda un minuto aprox)___')
+Parada('Estudio preliminar de los parámetros (tarda un minuto aprox)')
 # Parámetros por defecto
-'''
 MLP_1 = MLPRegressor(
     random_state=1,
     max_iter=500,
     shuffle = True,
     activation = 'logistic',
-    radom_state = False
+
 )
-'''
+
 tam_capas = [50, 75, 100]
 
 parametros = {
@@ -40,7 +29,7 @@ parametros = {
     'solver':['sgd', 'adam']
 }
 
-'''  Descomentar    
+ 
 resultados_1 = MuestraResultadosVC(
     MLP_1,
     parametros,
@@ -48,7 +37,7 @@ resultados_1 = MuestraResultadosVC(
     y_train
     
 )
-'''
+
 
 ## De este experimento los mejores resultados han sido
 #Mejores parámetros:  {'hidden_layer_sizes': (100, 50), 'solver': 'adam'}
@@ -59,10 +48,10 @@ resultados_1 = MuestraResultadosVC(
 
 # Procedamos ahora a hacer una exploración del learning rate y la regularización
 
-Parada(' ____ Estudio sobre el learning rate (tarda menos de un minuto aprox)___')
+Parada('Estudio sobre el learning rate (tarda medio minuto aprox)')
 # Parámetros por defecto
 MLP_2 = MLPRegressor(
-    #random_state=1,
+    random_state=1,
     max_iter=200,
     shuffle = True,
     early_stopping = False,
@@ -80,7 +69,7 @@ parametros = {
 
 }
 
-'''   descomentar 
+
 resultados_2 = MuestraResultadosVC(
     MLP_2,
     parametros,
@@ -91,9 +80,9 @@ resultados_2 = MuestraResultadosVC(
 
 
 Parada( 'Muestro gráfico ')
+print('Gráfico que muestra la evolución del coefiente de terminación frente la tasa de aprendizaje')
+GraficaError(learnig_rates, resultados_2, 'tasa de aprendizaje')
 
-GraficaError(learnig_rates, resultados_2)
-'''
 
 ## Experimento sobre el método de adaptación
 
@@ -118,7 +107,6 @@ parametros_3 = {
 
 }
 
-'''descomentar
 resultados_3 = MuestraResultadosVC(
     MLP_3,
     parametros_3,
@@ -128,9 +116,10 @@ resultados_3 = MuestraResultadosVC(
 )
 
 Parada( 'Muestro gráfico comparación regularización ')
+print('Grafica que compara la evolución de R^2 frente a la regularización')
+GraficaError( regularizacion, resultados_3, 'regularización')
 
-GraficaError( regularizacion, resultados_3)
-'''
+# -------------------------------------
 
     
 Parada('Experimento de número de iteraciones ')
@@ -143,7 +132,8 @@ MLP_4 = MLPRegressor(
     early_stopping = False,
     activation = 'logistic',
     hidden_layer_sizes = (100, 50),
-    solver = 'adam'
+    solver = 'adam',
+    alpha = 0.01
     
 )
 maximas_iteraciones = [10, 50, 100, 200, 350]
@@ -161,10 +151,10 @@ resultados_4 = MuestraResultadosVC(
     
 )
 
+''' Comento porque tiene poco sentido mostrar esta gráfica
 Parada( 'Muestro gráfico comparación número de iteraciones')
-
 GraficaError( maximas_iteraciones, resultados_4)
-
+'''
 
 # ------- tras todo esto el modelo seleccionado por cross validation es ---
 
@@ -175,10 +165,32 @@ MLP_mejor = MLPRegressor(
     activation = 'logistic',
     hidden_layer_sizes = (100, 50),
     solver = 'adam',
-    alpha = 0.01
+    alpha = 0.01,
+    learning_rate_init = 0.001
     
 )
 
-MLP_mejor.fit(x_train, x_test)
-
 # añadir función de evaluación de errores   
+
+Parada( 'MEJOR RESULTADO PARA MLP')
+print('''Los hiperparámetros seleccionados han sido:  
+    random_state=1,
+    shuffle = True,
+    early_stopping = False,
+    activation = 'logistic',
+    hidden_layer_sizes = (100, 50),
+    solver = 'adam',
+    alpha = 0.01,
+    learning_rate_init = 0.001
+    
+''')
+
+
+
+ConclusionesFinales( MLP_mejor,
+                     x_train,
+                     y_train,
+                     x_test,
+                     y_test,
+                     mostrar_coeficientes = False  #importante, porque AdaBoos no tiene esta función y daría error
+                    )

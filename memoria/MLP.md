@@ -32,8 +32,8 @@ https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPRegr
 Además utilizaremos los siguientes argumentos:  
 
 - `hidden_layer_sizes` número de unidades por capa en el rango 50-100, que afinaremos por validación cruzada.  Usaremos tres capas, ya que es lo que se nos pide, esto además nos parece coherente ya que con una capa oculta ya sabemos que es un aproximador universal ( Hornik, Kurt; Tinchcombe, Maxwell; White, Halbert (1989). Multilayer Feedforward Networks are Universal Approximators (PDF). Neural Networks, Vol. 2, pp. 359-366, 1989. Pergamon Press plc.).   
-- `activation`: `logistic` la función de activación logística NO TENGO ARGUMENTO PARA ELEGIR ESTA U OTRA.  
-- `solver`  la técnica para minimizar `adam` ya que según la documentación este método es el que funciona mejor con miles datos como es nuestro caso. 
+- `activation`: `logistic` sería indiferente usar una `tanh`, ninguna presenta ninguna ventaja frente a otra.  
+- `solver`  la técnica para minimizar `adam` ya que según la documentación este método es el que funciona mejor con miles datos como es nuestro caso, profundizaremos en este método más adelante.  
 - `alpha` método de regularización.  
 - `learning_rate: {'constant', 'invscaling', 'adaptative'}`.  
 - `learning_rate_init` aquí si hay que utilizarlo.  
@@ -41,7 +41,8 @@ Además utilizaremos los siguientes argumentos:
 
 ## Explicación del método de minimización de `adam`  
 
-Bibliografía: 
+Bibliografía:   
+
 Kingma, Diederik, and Jimmy Ba. "Adam: A method for stochastic optimization." arXiv preprint arXiv:1412.6980 (2014).  
 
 Es un método basado en la optimización de gradiente descendiente.  Requiere de gradiente de primer orden.   
@@ -136,6 +137,8 @@ Es notoria la diferencia entre utilizar un método de minimización u otro, de h
 estar pasando con el sgd ¿Son insuficientes el número de iteraciones? Sea como fuere, el métodod de minimización de `adam` es mejor así continuaremos trabajando con él para comprobar si podemos refinarlo.   
 
 
+\newpage 
+
 
 ## Estudiaremos ahora el learning rate  
 
@@ -147,31 +150,33 @@ Table: Error cambiando la tasa de aprendizaje
 
  | Parámetros                | $R^2$ medio | Desviación tipica $R^2$ | Ranking | tiempo medio ajuste |
  |---------------------------|-------------|-------------------------|---------|---------------------|
- | learning_rate_init 0.001  | 0.6205      | 0.0135                  | 1       | 1.9583              |
- | learning_rate_init 0.0001 | 0.5509      | 0.0394                  | 2       | 2.6418              |
- | learning_rate_init 0.1    | 0.4827      | 0.0306                  | 3       | 5.1666              |
- | learning_rate_init 0.01   | 0.4819      | 0.0400                  | 4       | 5.8938              |
- | learning_rate_init 1      | -2.9998     | 5.4594                  | 5       | 2.6030              |
+ | learning_rate_init 0.001  | 0.6205      | 0.0135                  | 1       | 2.2736              |
+ | learning_rate_init 0.0001 | 0.5418      | 0.0210                  | 2       | 3.5609              |
+ | learning_rate_init 0.1    | 0.4921      | 0.0603                  | 3       | 7.0441              |
+ | learning_rate_init 0.01   | 0.4705      | 0.0327                  | 4       | 7.6932              |
+ | learning_rate_init 1      | -0.4716     | 0.7183                  | 5       | 3.8819              |  
 
 
-
-El `learning_rate_init` tiene un $R^2$ probablemente por el número de iteraciones, no vamos  a estudiar su comportamiento aumentando el número de iteraciones porque con un `learning_rate_init` de `0.001`  se ha conseguido el mismo $R^2$ que en el mejor de los casos anteriores y en menos iteraciones, luego resulta más interesante su exploración. 
 
 
 \begin{figure}[!h]
 \centering
-\includegraphics[width=1\textwidth]{./imagenes/MLP/learning_rates_comparativa_grande.png}
-\caption{Variación de $R^2$ del learning rate}
+\includegraphics[width=1\textwidth]{./imagenes/MLP/learning_rates_comparativas.png}
+\caption{Variación de $R^2$ conforme aumenta el learning rate}
 \end{figure}.   
 
 
-Dicho esto observamso que en un intervalo entre (0.0001, 0.01) se encuentra el mejor.  
+El `learning_rate_init 0.0001  ` tiene un $R^2$ probablemente por el número de iteraciones, no vamos  a estudiar su comportamiento aumentando el número de iteraciones porque con un `learning_rate_init` de `0.001`  se ha conseguido el mismo $R^2$ que en el mejor de los casos anteriores y en menos iteraciones, luego resulta más interesante su exploración. 
 
-Hasta ahora teníamos constante el método de adaptación del `learing rate`, 
+
+Dicho esto observamos que en un intervalo entre (0.0001, 0.01) se encuentra el mejor valor asociado a la tase de variación.  
+
+Si bien en los experimentos realizados hasta ahora mantenemos  constante el método de adaptación del `learing rate`.
 Podría contemplarse un estudio utilizando un criterio adaptativo: `adaptative`.  
-Éste se mantiene contastes siempre que el error de entramiento siga decreciendo, si se dan dos épocas consecutivas en el que la variación es menor que la tolerancia entonces es dividido entre 5.   
+Éste consiste en un método de actualización de la tasa de aprendizaje: 
+la mantiene constante siempre que el error de entrenamiento siga decreciendo, si se dan dos épocas consecutivas en el que la variación es menor que la tolerancia entonces es dividida entre 5.   
 
-Sin embargo no es compatible con `Adam` según la documentación oficial, así qque estudiaremos la regularización. 
+Sin embargo no es compatible con `Adam` según la documentación oficial, así pues estudiaremos la regularización. 
 
 Para ello mantenemos condiciones iniciales anteriores y variamos los valores de regularización, obteniendo con ellos los siguietne errores:  
 
@@ -185,18 +190,40 @@ Table: Evolución $R^2$ con regularización.
  | alpha 0      | 0.6205      | 0.0135                  | 4       | 1.8057              |
  | alpha 1      | 0.5338      | 0.0139                  | 5       | 3.9193              |
 
-Obtenemos por tanto que la regularización mejor está entre $(0.0001, 0.001)$ da resultados similares y la diferencia entra dentro de la desviación típica, así que cualquiera de las tres sería aceptada, a partir de ahora trabajaremso con la de 0.01. 
+Obtenemos por tanto que la regularización mejor está entre $(0.0001, 0.001)$ da resultados similares y la diferencia entra dentro de la desviación típica, así que cualquiera de las tres sería aceptada, a partir de ahora trabajaremos con la de 0.01.
 
-Finalmente vemos que aumentar las iteraciones no mejora el error. 
+\begin{figure}[!h]
+\centering
+\includegraphics[width=1\textwidth]{./imagenes/MLP/regularizacion.png}
+\caption{Variación de $R^2$ conforme aumenta el learning rate}
+\end{figure}.  
 
-Los valores son 
+Finalmente veamos que aumentar las iteraciones no mejora el error. 
 
-La tolerancia por defento es de 0.0001, la cual nos parece razonable y por eso la mantenemose
-
+Table: Comparativa del número de iteraciones máximas y el $R^2$.  
  | Parámetros   | $R^2$ medio | Desviación tipica $R^2$ | Ranking | tiempo medio ajuste |
  |--------------|-------------|-------------------------|---------|---------------------|
- | max_iter 50  | 0.6205      | 0.0135                  | 1       | 1.8014              |
- | max_iter 100 | 0.6205      | 0.0135                  | 1       | 1.8023              |
- | max_iter 200 | 0.6205      | 0.0135                  | 1       | 1.7872              |
- | max_iter 350 | 0.6205      | 0.0135                  | 1       | 1.7923              |
- | max_iter 10  | 0.5985      | 0.0173                  | 5       | 0.7059              |
+ | max_iter 50  | 0.6228      | 0.0129                  | 1       | 2.4215              |
+ | max_iter 100 | 0.6228      | 0.0129                  | 1       | 2.5108              |
+ | max_iter 200 | 0.6228      | 0.0129                  | 1       | 2.3298              |
+ | max_iter 350 | 0.6228      | 0.0129                  | 1       | 2.4216              |
+ | max_iter 10  | 0.5987      | 0.0172                  | 5       | 1.0262              |
+
+
+### Modelo definitivo seleccionado  
+
+Los hiperparámetros seleccionados han sido:
+
+```
+random_state=1
+shuffle = True,
+early_stopping = False,
+activation = 'logistic',
+hidden_layer_sizes = (100, 50),
+solver = 'adam',
+alpha = 0.01
+learning_rate_init = 0.001
+```  
+
+R^2_in : 0.6437 , R^2_test :0.6055
+Tras entrenar con todos los datos: R^2_in : 0.6507   

@@ -23,23 +23,10 @@ x_test_sin_normalizar
 x_train_outliers_normalizado  | son outliers normalizados
 x_test_outliers_normalizado 
 '''
-
-
-'''xf
-boostingRegresion =  AdaBoostClassifier(
-    n_estimators=n_estimadores,
-    learning_rate = tasa_aprendizaje,
-    loss = funcion_perdida, )
 '''
 
-Parada('Comenzaremos el cálculo de cross validation, tarda aproximadamente un minuto')
-'''
-parametros = {
-     'n_estimators' :[50,70],#[50, 75, 100, 125],
-    'learning_rate' : [0.01]#[0.001, 0.01, 0.1, 1, 1.1]#,
-    #'loss' : ('linear')#[funcion_perdida]
-    }
-'''
+Parada('Estimación inicial del cálculo de cross validation, tarda aproximadamente un minuto')
+
 parametros = {
      'n_estimators' :[50, 60, 80, 100],
     'learning_rate' : [0.001, 0.01, 0.1, 1]
@@ -49,7 +36,7 @@ parametros = {
 # https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html
 boostingRegresion =  AdaBoostRegressor(random_state = 2)
 
-#DESCOMENTAR
+
 MuestraResultadosVC( boostingRegresion, parametros, x_train, y_train)
 
 
@@ -81,41 +68,105 @@ y_conjuntos = [
 
 for i in range(len(conjuntos)):
     print( f'\n--- {conjuntos[i]}----')
-    #DESCOMENTAR
-    '''
+
     MuestraResultadosVC( boostingRegresion,
                          parametros_seleccionados,
                          x_conjuntos[i],
                          y_conjuntos[i]
                         )
-    '''
+    
+#####_____Comprobamos si existe sobre ajuste con el número de estimadores ____
+Parada('Experimento sobre ajuste en función del número de estimadores')
+# reservamos un conjunto de datos de evaluación
+x_train_aux, x_eval, y_train_aux, y_eval = train_test_split(
+    x_train, y_train,
+    test_size= 0.15,
+    shuffle = True, 
+    random_state=1)
 
-##### ______- aumentamso la dimensión del espacio de búsqueda  _________
+
+# Errores
+Ein = []
+Eval = []
+
+# Cálculos de los errores 
+ESTIMADORES = [i for i in range(50, 101, 5)]
+
+print('| Nº estimadores | $E_{in}$ | $E_{eval}$|     ')
+print('|---'*3, '|     ')
+
+for n_estimadores in ESTIMADORES:
+    boosting =  AdaBoostRegressor(
+        n_estimators=n_estimadores,
+        learning_rate = 0.1,
+        random_state=1,
+        #shuffle = True
+    )
+    boosting.fit(x_train_aux, y_train_aux)
+    Ein.append(boosting.score(x_train_aux, y_train_aux))
+    Eval.append(boosting.score(x_eval, y_eval))
+    print('| {} | {:.4f} | {:0.4f}|     '.format
+          (
+              n_estimadores,
+              Ein[-1],
+              Eval[-1]
+          )
+    )
+Parada('Mostramos gráfico de la evolución de de Ein y Eval')
+
+GraficaComparativaEinEval( ESTIMADORES, Ein,Eval, 'nº estimadores')
+    
+
+
+##### ______ aumentamos la dimensión del espacio de búsqueda  _________
 
 Parada(' Transformación de los datos ')
 
 parametros_seleccionados = {
-     'n_estimators' :[50, 100], # estos valores por el tiempo
-    'learning_rate' : [ 0.1, 0.01]
+     'n_estimators' :[50], # estos valores por el tiempo
+    'learning_rate' : [0.1]
     }
 grados = [1,2,3]
 
 for g in grados:
-    print(f'\n --- Validación cruzada para grado {g} --- ')
+    print(f'\n --- Validación cruzada para grado {g}  --- ')
     x_polinomio = TransformacionPolinomica(
         g,
-        x_train_outliers_normalizado)
+    x_train_con_outliers)
 
-    ''' DESCOMENTAR
     MuestraResultadosVC( boostingRegresion,
                          parametros_seleccionados,
                          x_polinomio,
                          y_train_con_outliers
                         )
-    '''
     
+  '''  
+## _________ Hiperparámetros seleccionados finalmete seleccionado  __________
+
+Parada('CONCLUSIONES, MEJORES HIPERPARÁMETROS ADABOOST')
+
+print('Se han seleccionado los parámetros: ')
+print(''' Se han seleccionado los siguientes parámetros: 
+    Datos sin normalizar con outliers
+    n_estimators = 50,
+    learning_rate = 0.1,
+    random_state = 2
+''')
 
 
+boosting_mejor =  AdaBoostRegressor(
+    n_estimators = 50,
+    learning_rate = 0.1,
+    random_state = 2
+)
+
+ConclusionesFinales( boosting_mejor,
+                     x_train_con_outliers,
+                     y_train_con_outliers,
+                     x_test_sin_normalizar,
+                     y_test,
+                     mostrar_coeficientes = False  #importante, porque AdaBoos no tiene esta función y daría error
+                    )
 
 
 
@@ -136,6 +187,7 @@ EvolucionDatosEntrenamiento(boosting_regresion_1,
                             x_train_con_outliers,
                             y_train_con_outliers,
                             numero_particiones = 20,
-                            porcentaje_validacion = 0.2)
+                            porcentaje_validacion = 0.2,
+                            dos_separadas = False)
 
 
