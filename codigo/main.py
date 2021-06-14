@@ -93,8 +93,8 @@ def Parada(mensaje = None):
     '''
     Hace parada del código y muestra un mensaje en tal caso 
     '''
-    print('\n-------- fin apartado, enter para continuar -------\n\n')
-    #input('\n-------- fin apartado, enter para continuar -------\n\n')
+    #print('\n-------- fin apartado, enter para continuar -------\n\n')
+    input('\n-------- fin apartado, enter para continuar -------\n\n')
     
     if mensaje:
         print('-'*40)
@@ -916,6 +916,7 @@ importancias.pop(max_index3)
 
 print("Los atributos más importantes son: ", max_index1, max_index2, max_index3)
 
+print("\n---------------MLP---------------\n")
 
 Parada('Estudio preliminar de los parámetros (tarda un minuto aprox)')
 # Parámetros por defecto
