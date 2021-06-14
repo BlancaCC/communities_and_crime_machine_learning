@@ -194,17 +194,3 @@ ConclusionesFinales( MLP_mejor,
                      y_test,
                      mostrar_coeficientes = False  #importante, porque AdaBoos no tiene esta función y daría error
                     )
-
-
-Los valores seleccionados han sido:
-    random_state=1,
-    shuffle = True,
-    early_stopping = False,
-    activation = 'logistic',
-    hidden_layer_sizes = (100, 50),
-    solver = 'adam',
-    alpha = 0.01
-
-
-R^2_in : 0.6437 , R^2_test :0.6055
-Tras entrenar con todos los datos: R^2_in : 0.6507 
