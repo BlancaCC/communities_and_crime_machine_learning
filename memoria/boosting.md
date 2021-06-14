@@ -19,7 +19,8 @@ Los hiperparámetros que ajustaremos y utilizaremos de esta función son los sig
 
 -  `base_estimator` objeto con el estimador base que utilizar, utilizares `DecisionTreeRegressor` inicialos con profundidad máxima de tres. (TODO, justificar, en el guión se nos indica que utilicemos estos.    
 - `learning_rate` haremos un estudio de cómo varía en función del larning rate.  
-- `loss` La función de pérdida para actualizar los pesos del boosting en cada iteración, será la línea 
+- `loss` La función de pérdida para actualizar los pesos del boosting en cada iteración, será la linear. No tenemos ningún motivo para preferir uno frente a otro.  
+
 - `n_estimators` número de estimadores para el cual el boosting termina, en caso de encontrarse un ajuste perfector pararía antes.   
 
 ### Estudio preliminar  
@@ -140,14 +141,42 @@ Table: Normalizado con outliers
 | n_estimators 100 learning_rate 0.1  | 0.5801      | 0.0246                  | 4.0000  | 2.7327       |
 
 
-El hecho de que los mejores sean  sin normalizar con outliers y normalizado con outliers; 
-y que ambos tengan errores muy similares nos hace pensar que aunque fuimos comedidos con la eliminación de datos
-estos juegan un importancia. (TODO Explicar mejor)  
+El hecho de que los mejores sean  sin normalizar con outliers y normalizado con outliers, nos hacen pensar dos cosas:  
+1. Se está produciendo sobre ajuste.  
+2. Que el criterio de eliminación fue demasiado estricto.  
 
-Aumentaremos por tanto la dimensión para ver si conseguimos mejor explicación.  
+Para comprobar estas hipótesis plantearemos los siguientes experimentos:  
+
+1. Estudio de la diferencia entre $E_{in}$ y $E_{val}$  
+2. Aumentaremos la dimensión para ver si conseguimos mejor explicación.  
 
 
-### Aumento de la dimensión por transformaciones lineales  
+### 1. Estudio de la difrencia entre $E_{in}$ y $E_{val}$ variando el número de estimadores.  
+
+Para formular este experimento se han reservado un $15\%$ de datos del conjuntp entrenamiento como evaluación. Hemos considerado este porcertanje frente al $20\%$ para tener más datos de entrenamiento y que el ajuste sea más similar al anterior.   
+
+
+Como podemos observar se produce un ligero sobreajuste.  
+
+Table: Comparativas $E_{in}$ y  $E_{eval}$ en función del número de estimadores, con datos de entrenamiento normalizados sin outliers.   
+
+| Nº estimadores | $E_{in}$ | $E_{eval}$ |
+|----------------|----------|------------|
+| 50             | 0.6455   | 0.6210     |
+| 55             | 0.6451   | 0.6213     |
+| 60             | 0.6470   | 0.6165     |
+| 65             | 0.6479   | 0.6157     |
+| 70             | 0.6495   | 0.6145     |
+| 75             | 0.6508   | 0.6112     |
+| 80             | 0.6514   | 0.6114     |
+| 85             | 0.6496   | 0.6096     |
+| 90             | 0.6509   | 0.6112     |
+| 95             | 0.6505   | 0.6080     |
+| 100            | 0.6501   | 0.6058     |
+
+
+
+### 2. Aumento de la dimensión por transformaciones lineales  
 
 
 

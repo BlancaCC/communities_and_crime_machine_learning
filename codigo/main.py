@@ -432,10 +432,35 @@ def GraficaError(parametros, resultados, nombre_parametros = None):
     plt.legend()
     plt.show()
 
-   
-def GraficaRegularizacion(E_in,E_val,alpha):
-    '''TODO ALEX, explica tú esto
+
+
+def GraficaComparativaEinEval( ejex, E_in,E_val, etiqueta):
     '''
+    INPUT:
+    - ejex: parámetro que deseamos comparar
+    - E_in , E_val: lista de los respectivos errores
+    - etiqueta: string con el nombre de lo que estamos comparando
+    '''
+    plt.clf()
+    plt.plot( ejex, E_in, c = 'orange', label='$E_{in}$') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
+    plt.plot( ejex, E_val, c = 'blue', label='$E_{val}$') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
+    plt.legend();
+    plt.title(f'Influencia de {etiqueta}  en train y validación')
+    plt.xlabel(etiqueta)
+    plt.ylabel('R2')
+    plt.show()
+
+def GraficaRegularizacion(E_in,E_val,alpha):
+    '''Alex, lo siento pero es que la necesitaba más general
+    '''
+    GraficaComparativaEinEval( alpha, E_in,E_val, 'regularización')
+
+
+    
+'''   
+def GraficaRegularizacion(E_in,E_val,alpha):
+   #TODO ALEX, explica tú esto
+  xs
     plt.plot( alpha, E_in, c = 'orange', label='E_in') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
     plt.plot( alpha, E_val, c = 'blue', label='E_test') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
     plt.legend();
@@ -444,7 +469,7 @@ def GraficaRegularizacion(E_in,E_val,alpha):
     plt.ylabel('R2')
     plt.figure()
     plt.show()
-
+`'''
 ########################################################################
 ## Función de transformación de datos
 def TransformacionPolinomica( grado,x):
@@ -465,7 +490,7 @@ def TransformacionPolinomica( grado,x):
 
 
 
-def TablasComparativasEvolucion (tam, ein, eout):
+def TablasComparativasEvolucion (tam, ein, eval):
     '''
     Muestra dos tablas comparativas de la variación 
 de los errores en función del tamaño de entrenamiento.
@@ -478,13 +503,13 @@ de los errores en función del tamaño de entrenamiento.
 
     plt.subplot(121)
     plt.plot(tam,ein)
-    plt.title('Variación $R^2$ in')
+    plt.title('Variación $R^2$ $E_{in}$')
     plt.xlabel('Tamaño set entrenamiento')
     plt.ylabel('$R^2$')
 
     plt.subplot(122)
-    plt.plot(tam, eout)
-    plt.title('Variación $R^2$ out')
+    plt.plot(tam, eval)
+    plt.title('Variación $R^2$ $E_{eval}$')
     plt.xlabel('Tamaño set entrenamiento')
     plt.ylabel('$R^2$')
 
@@ -494,8 +519,8 @@ de los errores en función del tamaño de entrenamiento.
     # juntos
     Parada('Comarativas separadas')
     plt.title('Comparativas $R^2$')
-    plt.plot(tam,ein, label = '$R^2$ in' )
-    plt.plot(tam, eout, label = '$R^2$ out' )
+    plt.plot(tam,ein, label = '$R^2$ $E_{in}$' )
+    plt.plot(tam, eval, label = '$R^2$ $E_{val}$' )
 
     plt.xlabel('Tamaño set entrenamiento')
     plt.ylabel('$R^2$')
@@ -524,7 +549,7 @@ def EvolucionDatosEntrenamiento(modelo,
     validación. 
 
     Las tablas que muestra depende de las definidas en la función 
-    TablasComparativasEvolucion (tam, ein, eout)
+    TablasComparativasEvolucion (tam, ein, eval)
     '''
 
     # retiramos subconjunto para test, para no hacer data snopping
@@ -540,7 +565,7 @@ def EvolucionDatosEntrenamiento(modelo,
     score_in = np.zeros( numero_particiones)
     score_out = np.zeros( numero_particiones)
 
-    print('| Tamaño | $R^2$ in | $R^2$ out |    ')
+    print('| Tamaño | $R^2$ $E_{in}$ | $R^2$ $E_{eval}$ |    ')
     print('|---'*3 , '|    ')
     
     for i,tam in enumerate(size_set_entrenamiento):
