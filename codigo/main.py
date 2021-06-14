@@ -40,6 +40,7 @@ from sklearn.dummy import DummyRegressor
 from sklearn.neural_network import MLPRegressor
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import AdaBoostRegressor
 
 # Preprocesado 
 # ==========================
@@ -270,79 +271,6 @@ print("\nVector y de etiquetas de entrenamiento sin outliers: ", y_train.shape)
 
      
 ##########################################################################
-
-
-'''
-def EvaluacionSimple( clasificador,
-                x, y, 
-                k_folds,
-                nombre_modelo,
-                metrica_error):
-'''
-'''
-    Función para automatizar el proceso de experimento: 
-    1. Ajustar modelo.
-    2. Aplicar validación cruzada.
-    3. Medir tiempo empleado en ajuste y validación cruzada.
-    4. Medir la precisión.   
-
-    INPUT:
-    - Clasificador: Modelo con el que buscar el clasificador
-    - X datos entrenamiento. 
-    - Y etiquetas de los datos de entrenamiento
-    - k-folds: número de particiones para la validación cruzada
-    - metrica_error: debe estar en el formato sklearn (https://scikit-learn.org/stable/modules/model_evaluation.html)
-
-    OUTPUT:
-'''
-'''
-
-    ###### constantes a ajustar
-    numero_trabajos_paralelos_en_validacion_cruzada = NUMERO_CPUS_PARALELO
-    ##########################
-    
-    print('\n','-'*20)
-    print (f' Evaluando {nombre_modelo}')
-    
-    #print(f'\n------ Ajustando modelo------\n')        
-    tiempo_inicio_ajuste = time.time()
-    
-    #ajustamos modelo 
-    ajuste = clasificador.fit(x,y) 
-    tiempo_fin_ajuste = time.time()
-
-    tiempo_ajuste = tiempo_fin_ajuste - tiempo_inicio_ajuste
-
-     
-
-    #validación cruzada
-    tiempo_inicio_validacion_cruzada = time.time()
-
-    score_validacion_cruzada = cross_val_score(
-        clasificador,
-        x, y,
-        scoring = metrica_error,
-        cv = k_folds,
-        n_jobs = numero_trabajos_paralelos_en_validacion_cruzada
-    )
-    tiempo_fin_validacion_cruzada = time.time()
-    
-    tiempo_validacion_cruzada = tiempo_fin_validacion_cruzada - tiempo_inicio_validacion_cruzada
-
-    print('\tscore_validacion_cruzada')
-    print(score_validacion_cruzada)
-    
-    print('--------------------')
-    print ('\tMedia error de validación cruzada {:.5f} '.format(score_validacion_cruzada.mean()))
-    print('--------------------')
-    
-    print('\tDesviación típica del error de validación cruzada {:.5f} '.format(score_validacion_cruzada.std()))
-    print('\tTiempo empleado para el ajuste: {:.4f}s '.format(tiempo_ajuste))
-    print('\tTiempo empleado para el validacion cruzada {:.4f}s'.format(tiempo_validacion_cruzada))
-
-    return ajuste
-'''
-
 
 
  
@@ -631,7 +559,32 @@ def ConclusionesFinales( modelo,
                                 n_jobs=-1))
         print('E_out {:.4f}'.format(e_out))
         
+def Evaluacion_test( modelo, x, y, x_test, y_test, nombre_modelo):
+    '''
+    Función para calcular error en entrenamiento y validación  
+    INPUT:
+    - modelo: Modelo con el que calcular los errores
+    - X datos entrenamiento. 
+    - Y etiquetas de los datos de entrenamiento
+    - x_test, y_test conjunto de entrenamiento y etiquetas de validación
+    '''
 
+    ##########################
+    
+    print('\n','-'*60)
+    print (f' Evaluando {nombre_modelo}')
+    print('-'*60)
+    # Error cuadrático medio
+    # predecimos test acorde al modelo
+    modelo.fit(x, y)
+    prediccion = modelo.predict(x)
+    prediccion_test = modelo.predict(x_test)
+
+    Etest=r2_score(y_test, prediccion_test)
+    Ein=r2_score(y, prediccion)
+    print("E_in en entrenamiento: ",Ein)
+    print("E_test en test: ",Etest)
+ 
 
 def Evaluacion_test_modelos_lineales( modelo, x, y, x_test, y_test, nombre_modelo):
     '''
@@ -1179,4 +1132,273 @@ ConclusionesFinales( MODELO_RANDOM_FOREST,
 #######################################################
 #
                 
-                
+ #               SVM
+########################################################
+#################################################################
+###################### Modelos a usar ###########################
+Parada('Primer Modelo: SVM aplicado a Regresión con kernel polinómico')
+
+parametros = {
+     'degree':[2]
+    }
+
+
+modelo=SVR(kernel='poly')
+MuestraResultadosVC(modelo,parametros, x_train, y_train)
+
+Parada('Ajustamos ahora con Outliers')
+
+MuestraResultadosVC(modelo,parametros, x_train_outliers_normalizado, y_train_con_outliers)
+
+Parada('Segundo Modelo: SVM aplicado a Regresión con kernel RBF')
+
+#Segundo Modelo: SVM aplicado a Regresión con kernel RBF
+#Hago un vector con modelos del mismo tipo pero variando los parámetros
+modelo=SVR(kernel='rbf')
+MuestraResultadosVC(modelo,parametros, x_train, y_train)
+
+Parada("Ajustamos ahora con Outliers")
+
+MuestraResultadosVC(modelo,parametros, x_train_outliers_normalizado, y_train_con_outliers)
+
+
+print("\nComo con Outliers da mejor resultado, vamos a estimar los parámetros para el ajuste con Outliers para los SVM con kernel polinómico y rbf")
+modelo2=SVR(kernel='rbf',degree=2)
+
+print("\n\nPrimero estimamos gamma")
+parametros = {
+    'gamma' : ['scale', 'auto']
+    }
+print("\n------------------SVM Kernel rbf------------------\n")
+MuestraResultadosVC(modelo2,parametros, x_train_outliers_normalizado, y_train_con_outliers)
+
+print("\n\nUna vez estimado el mejor valor de gamma para cada modelo veamos el valor de C\n")
+modelo2=SVR(kernel='rbf',degree=2,gamma='scale')
+C=[0.1,0.2,0.5,1]
+parametros = {
+    'C' : C,
+    }
+
+Parada()
+print("\n------------------SVM Kernel rbf------------------\n")
+resultados=MuestraResultadosVC(modelo2,parametros, x_train_outliers_normalizado, y_train_con_outliers)
+GraficaError(C,resultados,"C")
+
+C =np.arange(0.1, 0.31, 0.01).tolist()
+parametros = {
+    'C' : C,
+    }
+Parada()
+print("\n------------------SVM Kernel rbf------------------\n")
+resultados=MuestraResultadosVC(modelo2,parametros, x_train_outliers_normalizado, y_train_con_outliers)
+GraficaError(C,resultados,"C")
+
+Parada()
+print("\n\nFinalmente ajustamos epsilon")
+modelo1=SVR(kernel='poly',degree=2,gamma='auto',C=0.28)
+e= [0.01,0.05,0.1,0.2]
+parametros = {
+    'epsilon':e
+}
+
+Parada()
+print("\n------------------SVM Kernel rbf------------------\n")
+resultados=MuestraResultadosVC(modelo2,parametros, x_train_outliers_normalizado, y_train_con_outliers)
+GraficaError(e,resultados,"epsilon")
+
+
+e =np.arange(0.001, 0.051, 0.001).tolist()
+parametros = {
+    'epsilon':e
+}
+Parada()
+print("\n------------------SVM Kernel rbf------------------\n")
+resultados=MuestraResultadosVC(modelo2,parametros, x_train_outliers_normalizado, y_train_con_outliers)
+GraficaError(e,resultados,"epsilon")
+
+
+Parada('Modelo final SVM con kernel RBF')
+modelo_definitivo=SVR(kernel='poly',degree=2,gamma='auto',C=0.28,epsilon=0.03)
+Evaluacion_test(modelo_definitivo, x_train_outliers_normalizado, y_train_con_outliers, x_test_outliers_normalizado, y_test, "SVR con Kernel rbf")
+
+
+
+#####################################################################
+#  Boosting  
+############################################################
+
+
+
+
+Parada('Estimación inicial del cálculo de cross validation, tarda aproximadamente un minuto')
+
+parametros = {
+     'n_estimators' :[50, 60, 80, 100],
+    'learning_rate' : [0.001, 0.01, 0.1, 1]
+    }
+
+
+# https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.GridSearchCV.html
+boostingRegresion =  AdaBoostRegressor(random_state = 2)
+
+
+MuestraResultadosVC( boostingRegresion, parametros, x_train, y_train)
+
+
+Parada('Cambiamos conjuntos de entrenamiento')
+
+
+parametros_seleccionados = {
+     'n_estimators' :[50, 100],
+    'learning_rate' : [0.01, 0.1,]
+    }
+conjuntos = ['Sin normalizar con outliers',
+             'Normalizado con outliers',
+             'Sin normalizar sin outliers',
+             'Normalizado con outliers'
+             ]
+
+x_conjuntos = [
+    x_train_con_outliers,
+    x_train_outliers_normalizado,
+    x_train_sin_normalizar,
+    x_train
+]
+
+y_conjuntos = [ 
+    y_train_con_outliers, y_train_con_outliers,
+    y_train,y_train
+    ]
+
+
+for i in range(len(conjuntos)):
+    print( f'\n--- {conjuntos[i]}----')
+
+    MuestraResultadosVC( boostingRegresion,
+                         parametros_seleccionados,
+                         x_conjuntos[i],
+                         y_conjuntos[i]
+                        )
+    
+#####_____Comprobamos si existe sobre ajuste con el número de estimadores ____
+Parada('Experimento sobre ajuste en función del número de estimadores')
+# reservamos un conjunto de datos de evaluación
+x_train_aux, x_eval, y_train_aux, y_eval = train_test_split(
+    x_train, y_train,
+    test_size= 0.15,
+    shuffle = True, 
+    random_state=1)
+
+
+# Errores
+Ein = []
+Eval = []
+
+# Cálculos de los errores 
+ESTIMADORES = [i for i in range(50, 101, 5)]
+
+print('| Nº estimadores | $E_{in}$ | $E_{eval}$|     ')
+print('|---'*3, '|     ')
+
+for n_estimadores in ESTIMADORES:
+    boosting =  AdaBoostRegressor(
+        n_estimators=n_estimadores,
+        learning_rate = 0.1,
+        random_state=1,
+        #shuffle = True
+    )
+    boosting.fit(x_train_aux, y_train_aux)
+    Ein.append(boosting.score(x_train_aux, y_train_aux))
+    Eval.append(boosting.score(x_eval, y_eval))
+    print('| {} | {:.4f} | {:0.4f}|     '.format
+          (
+              n_estimadores,
+              Ein[-1],
+              Eval[-1]
+          )
+    )
+Parada('Mostramos gráfico de la evolución de de Ein y Eval')
+
+GraficaComparativaEinEval( ESTIMADORES, Ein,Eval, 'nº estimadores')
+    
+
+
+##### ______ aumentamos la dimensión del espacio de búsqueda  _________
+
+Parada(' Transformación de los datos ')
+
+parametros_seleccionados = {
+     'n_estimators' :[50], # estos valores por el tiempo
+    'learning_rate' : [0.1]
+    }
+grados = [1,2,3]
+
+for g in grados:
+    print(f'\n --- Validación cruzada para grado {g}  --- ')
+    x_polinomio = TransformacionPolinomica(
+        g,
+    x_train_con_outliers)
+
+    MuestraResultadosVC( boostingRegresion,
+                         parametros_seleccionados,
+                         x_polinomio,
+                         y_train_con_outliers
+                        )
+    
+  
+## _________ Hiperparámetros seleccionados finalmete seleccionado  __________
+
+Parada('CONCLUSIONES, MEJORES HIPERPARÁMETROS ADABOOST')
+
+print('Se han seleccionado los parámetros: ')
+print(''' Se han seleccionado los siguientes parámetros: 
+    Datos sin normalizar con outliers
+    n_estimators = 50,
+    learning_rate = 0.1,
+    random_state = 2
+''')
+
+
+boosting_mejor =  AdaBoostRegressor(
+    n_estimators = 50,
+    learning_rate = 0.1,
+    random_state = 2
+)
+
+ConclusionesFinales( boosting_mejor,
+                     x_train_con_outliers,
+                     y_train_con_outliers,
+                     x_test_sin_normalizar,
+                     y_test,
+                     mostrar_coeficientes = False  #importante, porque AdaBoos no tiene esta función y daría error
+                    )
+
+
+
+## _______ comprobación tamaños del conjunto de entrenamiento  ______
+
+#### modelo seleccionado
+Parada('Evolución de los errores en función del tamaño de entrenamiento')
+
+boosting_regresion_1 =  AdaBoostRegressor(
+    n_estimators = 50,
+    learning_rate = 0.1,
+    random_state = 2
+)
+
+
+
+EvolucionDatosEntrenamiento(boosting_regresion_1,
+                            x_train_con_outliers,
+                            y_train_con_outliers,
+                            numero_particiones = 20,
+                            porcentaje_validacion = 0.2,
+                            dos_separadas = False)
+
+
+
+
+
+
+
+
