@@ -50,90 +50,94 @@ np.random.seed(1)
 NOMBRE_FICHERO_REGRESION = './datos/train.csv'
 
 ################ funciones auxiliares
-#ESTO SOBRA YA QUE LO QUE HAY QUE HACER ES UN import del main y que esto esté en el main
-### Validación cruzada
-def Evaluacion( modelos, x, y, x_test, y_test, k_folds, nombre_modelo):
+def Evaluacion_test_modelos_lineales( modelo, x, y, x_test, y_test, nombre_modelo):
     '''
-    Función para automatizar el proceso de experimento: 
-    1. Ajustar modelo.
-    2. Aplicar validación cruzada.
-    3. Medir tiempo empleado en ajuste y validación cruzada.
-    4. Medir Error cuadrático medio.   
+    Función para calcular error en entrenamiento y test  
     INPUT:
-    - modelo: Modelo con el que buscar el clasificador
+    - modelo: Modelo con el que calcular los errores
     - X datos entrenamiento. 
     - Y etiquetas de los datos de entrenamiento
-    - x_test, y_test
-    - k-folds: número de particiones para la validación cruzada
-    OUTPUT:
+    - x_val, y_val conjunto de entrenamiento y etiquetas de validación
     '''
 
-    ###### constantes a ajustar
-    numero_trabajos_paralelos_en_validacion_cruzada = 2 
     ##########################
     
     print('\n','-'*60)
     print (f' Evaluando {nombre_modelo}')
     print('-'*60)
-
-
-    print('\n------ Comienza Validación Cruzada------\n')        
-
-    #validación cruzada
-    np.random.seed(0)
-    tiempo_inicio_validacion_cruzada = time.time()
-
-    best_score = np.infty
-    for model in modelos:
-        print(model)
-        score = np.mean(cross_val_score(model, x, y, cv = k_folds, scoring="r2",n_jobs=-1))
-        print('Error cuadrático medio del modelo con cv: ',score)
-        print()
-
-        if best_score > score:
-            best_score = score
-            best_model = model
-
-    tiempo_fin_validacion_cruzada = time.time()
-    tiempo_validacion_cruzada = (tiempo_fin_validacion_cruzada
-                                 - tiempo_inicio_validacion_cruzada)
-
-    print(f'\nTiempo empleado para validación cruzada: {tiempo_validacion_cruzada}s\n')
-    
-    print('\n\nEl mejor modelo es: ', best_model)
-    print('E_val calculado en cross-validation: ', best_score)
-
     # Error cuadrático medio
     # predecimos test acorde al modelo
-    best_model.fit(x, y)
-    prediccion = best_model.predict(x)
-    prediccion_test = best_model.predict(x_test)
+    modelo.fit(x, y)
+    prediccion = modelo.predict(x)
+    prediccion_test = modelo.predict(x_test)
 
     Etest=r2_score(y_test, prediccion_test)
     Ein=r2_score(y, prediccion)
-    print("Error cuadratico medio en entrenamiento: ",Ein)
-    print("Error cuadratico medio en test: ",Etest)
-
-    return best_model
+    print("E_in en entrenamiento: ",Ein)
+    print("E_test en validación: ",Etest)
+    
+    
+''' BORRAR     
+def GraficaError(param, resultados, Hiperparametro):
+    plt.plot( param, resultados['mean_test_score'], c = 'red', label='R2') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
+    plt.legend();
+    plt.title("Evolución del coeficiente R2")
+    plt.xlabel(Hiperparametro)
+    plt.ylabel('R2')
+    plt.figure()
+    plt.show()
+'''     
   
-#NO ME METAS UN INPU, QUE PA ESO YA HAY CREADO UNA FUNCIÓN QUE SE LLAMA Parada()             
-input("\n--- Pulsar tecla para continuar ---\n")
-
+Parada('Modelo: Regresión lineal con SVM')
 #################################################################
 ###################### Modelos a usar ###########################
-k_folds=10 #Número de particiones para cross-Validation
-
-print('\nPrimer Modelo: Regresión Lineal con SGD para obtener vector de pesos\n')
-#Primer Modelo: Regresión Lineal con SGD para obtener vector de pesos
-#Hago un vector con modelos del mismo tipo pero variando los parámetros
-modelos1=[SGDRegressor(loss='squared_loss', penalty=pen, alpha=a, learning_rate = lr, eta0 = 0.01, max_iter=5000)  for a in [0.0001,0.001] for pen in ['l1', 'l2'] for lr in ['optimal', 'adaptive'] ]
-modelo_elegido1=Evaluacion( modelos1, x_train, y_train, x_test, y_test, k_folds, 'Regresion Lineal usando SGD')
-input("\n--- Pulsar tecla para continuar ---\n")
-
-
-print('\nModelo: Regresión lineal con SVM\n')
+print('Esta parte tiene un costo computacional elevado y ha sido comentada')
+'''
 #Modelo: Regresión Lineal con SVM
-modelos2=[LinearSVR(epsilon=e, random_state=0, max_iter=10000) for e in [1, 1.5, 2, 2.5, 3, 3.5]]
+#Sin Outliers
+modelo=LinearSVR(random_state=0, max_iter=15000)
+x_entrenamiento=TransformacionPolinomica(2,x_train)
 
-#Usando cross-Validation tomo el modelo con los parámetros que mejor comportamiento tiene
-modelo_elegido2=Evaluacion( modelos2, x_train, y_train, x_test, y_test, k_folds, 'SVM aplicado a Regresión')
+
+print("Ajustamos el término de regularización C")
+C=[0.5,1,1.5,2]
+parametros = {
+     'C' : C
+    }
+
+resultados=MuestraResultadosVC(modelo,parametros, x_entrenamiento, y_train)
+GraficaError(C,resultados,'C')
+
+C=[0.1,0.2,0.3,0.4,0.5]
+parametros = {
+     'C' : C
+    }
+
+resultados=MuestraResultadosVC(modelo,parametros, x_entrenamiento, y_train)
+GraficaError(C,resultados,'C')
+
+e=[0.0,0.1,0.2,0.3]
+parametros = {
+     'epsilon' : e
+    }
+
+resultados=MuestraResultadosVC(modelo,parametros, x_entrenamiento, y_train)
+GraficaError(e,resultados,'epsilon')
+
+print("Probamos epsilon entre 0 y 0.9")
+e=[0.0,0.03,0.06,0.09]
+parametros = {
+     'epsilon' : e
+    }
+
+resultados=MuestraResultadosVC(modelo,parametros, x_entrenamiento, y_train)
+GraficaError(e,resultados,'epsilon')
+'''
+
+Parada('Modelo final lineal')
+x_entrenamiento=TransformacionPolinomica(2,x_train)
+
+modelo=LinearSVR(epsilon=0.03, C=0.1,random_state=0, max_iter=15000)
+
+x_test_polinomios=TransformacionPolinomica(2,x_test)
+Evaluacion_test_modelos_lineales( modelo, x_entrenamiento, y_train, x_test_polinomios, y_test,'SVM aplicado a Regresión')
