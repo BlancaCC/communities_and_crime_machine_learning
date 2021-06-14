@@ -490,37 +490,42 @@ def TransformacionPolinomica( grado,x):
 
 
 
-def TablasComparativasEvolucion (tam, ein, eval):
+def TablasComparativasEvolucion (tam, ein, e_val, dos_separadas = True):
     '''
-    Muestra dos tablas comparativas de la variación 
+    Muestra gráficas comparativas de la variación 
 de los errores en función del tamaño de entrenamiento.
+
+    - Si dos_separadas es True se muestra también la variación de los valores separados.
+    - si no solo una.
 
     Esta función se utiliza exclusivamente en la función: 
     EvolucionDatosEntrenamiento 
     '''
-    Parada('Comarativas evolución error por tamaño muestra separadas')
-    plt.figure(figsize = (9,9))
 
-    plt.subplot(121)
-    plt.plot(tam,ein)
-    plt.title('Variación $R^2$ $E_{in}$')
-    plt.xlabel('Tamaño set entrenamiento')
-    plt.ylabel('$R^2$')
+    if dos_separadas:
+        Parada('Comarativas evolución error por tamaño muestra separadas')
+        plt.figure(figsize = (9,9))
 
-    plt.subplot(122)
-    plt.plot(tam, eval)
-    plt.title('Variación $R^2$ $E_{eval}$')
-    plt.xlabel('Tamaño set entrenamiento')
-    plt.ylabel('$R^2$')
+        plt.subplot(121)
+        plt.plot(tam,ein)
+        plt.title('Variación $R^2$ $E_{in}$')
+        plt.xlabel('Tamaño set entrenamiento')
+        plt.ylabel('$R^2$')
 
-    plt.show()
+        plt.subplot(122)
+        plt.plot(tam, e_val)
+        plt.title('Variación $R^2$ $E_{eval}$')
+        plt.xlabel('Tamaño set entrenamiento')
+        plt.ylabel('$R^2$')
+
+        plt.show()
     
 
     # juntos
     Parada('Comarativas separadas')
     plt.title('Comparativas $R^2$')
     plt.plot(tam,ein, label = '$R^2$ $E_{in}$' )
-    plt.plot(tam, eval, label = '$R^2$ $E_{val}$' )
+    plt.plot(tam, e_val, label = '$R^2$ $E_{val}$' )
 
     plt.xlabel('Tamaño set entrenamiento')
     plt.ylabel('$R^2$')
@@ -533,7 +538,8 @@ de los errores en función del tamaño de entrenamiento.
 def EvolucionDatosEntrenamiento(modelo,
                                 x, y,
                                 numero_particiones,
-                                porcentaje_validacion = 0.2):
+                                porcentaje_validacion = 0.2,
+                                dos_separadas = True):
     '''
     Dado un modelos muestra la evolución del Error in y Error out
     En función del tamaño de entrenamiento 
@@ -588,9 +594,45 @@ def EvolucionDatosEntrenamiento(modelo,
     TablasComparativasEvolucion (
         size_set_entrenamiento,
         score_in,
-        score_out
+        score_out,
+        dos_separadas
         )
 
+
+#######################################################
+# Resultado finales de la selección final del modelo
+#######################################################
+
+def ConclusionesFinales( modelo,
+                         x_train, y_train,
+                         x_test, y_test,
+                         mostrar_coeficientes = True):
+
+    
+    modelo.fit(x_train,y_train)
+
+    E_in = modelo.score(x_train,y_train)
+    E_test = modelo.score(x_test,y_test)
+
+    # Entrenamos con todos los datos y devolvemos coeficientes:
+    x = np.append(x_train, x_test).reshape(len(x_train) + len(x_test),
+                                      len(x_train[0]))
+    y = np.append(y_train, y_test)
+
+    modelo.fit(x,y)
+    E_in_total = modelo.score(x,y)
+
+    # Imprimimos resultados
+    print('R^2_in : {:.4f} , R^2_test :{:.4f}'.format(
+        E_in, E_test ) )
+    print('Tras entrenar con todos los datos: R^2_in : {:.4f} '.format(E_in_total))
+
+
+    if mostrar_coeficientes:
+        print( modelo.coef_)
+
+    
+    
         
 
     
