@@ -88,11 +88,10 @@ def GraficaError(param, resultados, Hiperparametro):
     plt.show()
 '''     
   
-Parada('Pulsa una tecla para continuar')
+Parada('Modelo: Regresión lineal con SVM')
 #################################################################
 ###################### Modelos a usar ###########################
-
-print('\nModelo: Regresión lineal con SVM\n')
+print('Esta parte tiene un costo computacional elevado y ha sido comentada')
 '''
 #Modelo: Regresión Lineal con SVM
 #Sin Outliers
@@ -134,6 +133,8 @@ parametros = {
 resultados=MuestraResultadosVC(modelo,parametros, x_entrenamiento, y_train)
 GraficaError(e,resultados,'epsilon')
 '''
+
+Parada('Modelo final lineal')
 x_entrenamiento=TransformacionPolinomica(2,x_train)
 
 modelo=LinearSVR(epsilon=0.03, C=0.1,random_state=0, max_iter=15000)
