@@ -102,7 +102,7 @@ def Evaluacion_test_randomforest( modelo, x, y, x_test, y_test, nombre_modelo):
     print("E_in en entrenamiento: ",Ein)
     print("E_test en validación: ",Etest)
     return  modelo.feature_importances_
-      
+'''      
 def GraficaError(num_estimadores, resultados):
     plt.plot( num_estimadores, resultados['mean_test_score'], c = 'red', label='R2') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
     plt.legend();
@@ -111,8 +111,8 @@ def GraficaError(num_estimadores, resultados):
     plt.ylabel('R2')
     plt.figure()
     plt.show()
-
-   
+'''
+ 
 def GraficaRegularizacion(E_in,E_val,alpha):
     plt.plot( alpha, E_in, c = 'orange', label='E_in') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
     plt.plot( alpha, E_val, c = 'blue', label='E_val') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
@@ -144,11 +144,11 @@ modelo=RandomForestRegressor(random_state=0)
 MuestraResultadosVC(modelo,parametros, x_train, y_train)
 
 
+#------------------- Ajuste con outliers --------------------------------
 
-Parada("Pulse una tecla para continuar")
+Parada('Ajustamos ahora con Outliers')
+  
 
-
-print ("Ajustamos ahora con Outliers")
 
 resultados=MuestraResultadosVC(modelo,parametros, x_train_outliers_normalizado, y_train_con_outliers)
 
@@ -167,8 +167,7 @@ parametros = {
 resultados=MuestraResultadosVC(modelo,parametros, x_train_outliers_normalizado, y_train_con_outliers)
 
 #En esta gráfica vemos que el coeficiente R^2 parece alcanzar el máximo entre 260-290 estimadores
-GraficaError(num_estimadores,resultados)
-
+GraficaError(num_estimadores, resultados, 'n_estimators')
 
 num_estimadores =[]
 for i in range(260,295,5):
@@ -182,8 +181,8 @@ parametros = {
 resultados=MuestraResultadosVC(modelo,parametros, x_train_outliers_normalizado, y_train_con_outliers)
 
 #En esta gráfica vemos que el coeficiente R^2 es creciente
-GraficaError(num_estimadores,resultados)
-
+GraficaError(num_estimadores, resultados, 'n_estimators')
+Parada()
 
 num_estimadores =[]
 for i in range(280,292,2):
@@ -197,8 +196,9 @@ parametros = {
 resultados=MuestraResultadosVC(modelo,parametros, x_train_outliers_normalizado, y_train_con_outliers)
 
 #En esta gráfica vemos que el coeficiente R^2 es creciente
-GraficaError(num_estimadores,resultados)
+GraficaError(num_estimadores, resultados, 'n_estimators')
 
+Parada()
 print("\n Veamos si hay Sobrajuste: ")
 
 x_entrenamiento, x_validacion, y_entrenamiento, y_validacion=train_test_split(
@@ -211,6 +211,7 @@ x_entrenamiento, x_validacion, y_entrenamiento, y_validacion=train_test_split(
 modelo=RandomForestRegressor(max_features='sqrt',n_estimators=290,random_state=0)
 Evaluacion_validacion(modelo,x_entrenamiento,y_entrenamiento,x_validacion,y_validacion,'Random Forest')
 
+Parada()
 
 print("\n\nTratamos de reducir el sobreajuste: ")
 
@@ -227,6 +228,7 @@ E_in=[0.9531783709010848,0.8776642587554613,0.822134867592024,0.7791942044642272
 E_val=[0.6851165863802047,0.6828587662709389,0.6783327423991174,0.6700327984832091,0.6619702856867934,0.6550114680674126,0.6489352273229924,0.6426441681200656,0.6374229820589261,0.6321236114445636]
 
 GraficaRegularizacion(E_in,E_val,alpha)
+Parada()
 
 #El modelo final será con alpha=0.0006
 modelo=RandomForestRegressor(max_features='sqrt',n_estimators=290,ccp_alpha=0.0006, random_state=0)
@@ -239,6 +241,7 @@ plt.bar(caracteristicas,importancias, color='darkblue', align='center')
 plt.title ('Importancia de cada característica')
 plt.show()
 
+# Cogemos los elementos más importantes del árbol del decisión 
 importancias=importancias.tolist()
 maximo_1=max(importancias)
 max_index1=importancias.index(maximo_1)
