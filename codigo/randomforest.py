@@ -256,3 +256,7 @@ max_index3=importancias.index(maximo_3)
 importancias.pop(max_index3)
 
 print("Los atributos más importantes son: ", max_index1, max_index2, max_index3)
+
+
+score = np.mean(cross_val_score(modelo, x, y, cv = k_folds, scoring="r^2",n_jobs=-1)
+

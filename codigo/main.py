@@ -32,12 +32,14 @@ from pandas import read_csv
 # =========================================
 from sklearn.svm import SVR
 from sklearn.svm import LinearSVR
+from sklearn.dummy import DummyRegressor
 
 
 # Modelos no lineales a usar
 # =============================================
 from sklearn.neural_network import MLPRegressor
 from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import RandomForestRegressor
 
 # Preprocesado 
 # ==========================
@@ -66,10 +68,8 @@ from numpy.ma import getdata # para rescatar elementos del grid
 # metricas
 # ==========================
 from sklearn.metrics import mean_absolute_error
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import r2_score
 
-from sklearn.metrics import confusion_matrix
-from sklearn.metrics import plot_confusion_matrix
 
 # Otros
 # ==========================
@@ -92,8 +92,8 @@ def Parada(mensaje = None):
     '''
     Hace parada del código y muestra un mensaje en tal caso 
     '''
-    #print('\n-------- fin apartado, enter para continuar -------\n\n')
-    input('\n-------- fin apartado, enter para continuar -------\n\n')
+    print('\n-------- fin apartado, enter para continuar -------\n\n')
+    #input('\n-------- fin apartado, enter para continuar -------\n\n')
     
     if mensaje:
         print('-'*40)
@@ -272,13 +272,14 @@ print("\nVector y de etiquetas de entrenamiento sin outliers: ", y_train.shape)
 ##########################################################################
 
 
-
+'''
 def EvaluacionSimple( clasificador,
                 x, y, 
                 k_folds,
                 nombre_modelo,
                 metrica_error):
-    '''
+'''
+'''
     Función para automatizar el proceso de experimento: 
     1. Ajustar modelo.
     2. Aplicar validación cruzada.
@@ -293,7 +294,8 @@ def EvaluacionSimple( clasificador,
     - metrica_error: debe estar en el formato sklearn (https://scikit-learn.org/stable/modules/model_evaluation.html)
 
     OUTPUT:
-    '''
+'''
+'''
 
     ###### constantes a ajustar
     numero_trabajos_paralelos_en_validacion_cruzada = NUMERO_CPUS_PARALELO
@@ -338,10 +340,8 @@ def EvaluacionSimple( clasificador,
     print('\tTiempo empleado para el ajuste: {:.4f}s '.format(tiempo_ajuste))
     print('\tTiempo empleado para el validacion cruzada {:.4f}s'.format(tiempo_validacion_cruzada))
 
-
-
     return ajuste
-
+'''
 
 
 
@@ -454,25 +454,13 @@ def GraficaComparativaEinEval( ejex, E_in,E_val, etiqueta):
     plt.show()
 
 def GraficaRegularizacion(E_in,E_val,alpha):
-    '''Alex, lo siento pero es que la necesitaba más general
+    '''Versón particular de GraficaComparativaEinEval
     '''
     GraficaComparativaEinEval( alpha, E_in,E_val, 'regularización')
 
 
     
-'''   
-def GraficaRegularizacion(E_in,E_val,alpha):
-   #TODO ALEX, explica tú esto
-  xs
-    plt.plot( alpha, E_in, c = 'orange', label='E_in') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
-    plt.plot( alpha, E_val, c = 'blue', label='E_test') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
-    plt.legend();
-    plt.title("Influencia de la regularización en train y validación")
-    plt.xlabel('alpha')
-    plt.ylabel('R2')
-    plt.figure()
-    plt.show()
-`'''
+
 ########################################################################
 ## Función de transformación de datos
 def TransformacionPolinomica( grado,x):
@@ -609,7 +597,8 @@ def EvolucionDatosEntrenamiento(modelo,
 def ConclusionesFinales( modelo,
                          x_train, y_train,
                          x_test, y_test,
-                         mostrar_coeficientes = True):
+                         mostrar_coeficientes = True,
+                         leave_one_out = False):
 
     
     modelo.fit(x_train,y_train)
@@ -633,6 +622,15 @@ def ConclusionesFinales( modelo,
 
     if mostrar_coeficientes:
         print( modelo.coef_)
+
+    if leave_one_out == True:
+        e_out = np.mean(cross_val_score(modelo,
+                                x, y,
+                                cv = len(y)//50,
+                                scoring="r2",
+                                n_jobs=-1))
+        print('E_out {:.4f}'.format(e_out))
+        
 
 
 def Evaluacion_test_modelos_lineales( modelo, x, y, x_test, y_test, nombre_modelo):
@@ -663,6 +661,83 @@ def Evaluacion_test_modelos_lineales( modelo, x, y, x_test, y_test, nombre_model
     
     
 
+### Validación
+def Evaluacion_validacion( modelo, x, y, x_val, y_val, nombre_modelo):
+    '''
+    Función para calcular error en entrenamiento y validación  
+    INPUT:
+    - modelo: Modelo con el que calcular los errores
+    - X datos entrenamiento. 
+    - Y etiquetas de los datos de entrenamiento
+    - x_val, y_val conjunto de entrenamiento y etiquetas de validación
+    '''
+
+    ##########################
+    
+    print('\n','-'*60)
+    print (f' Evaluando {nombre_modelo}')
+    print('-'*60)
+    # Error cuadrático medio
+    # predecimos test acorde al modelo
+    modelo.fit(x, y)
+    prediccion = modelo.predict(x)
+    prediccion_val = modelo.predict(x_val)
+
+    Eval=r2_score(y_val, prediccion_val)
+    Ein=r2_score(y, prediccion)
+    print("E_in en entrenamiento: ",Ein)
+    print("E_val en validación: ",Eval)
+  
+def Evaluacion_test_randomforest( modelo, x, y, x_test, y_test, nombre_modelo):
+    '''
+    Función para calcular error en entrenamiento y test  
+    INPUT:
+    - modelo: Modelo con el que calcular los errores
+    - X datos entrenamiento. 
+    - Y etiquetas de los datos de entrenamiento
+    - x_val, y_val conjunto de entrenamiento y etiquetas de validación
+    '''
+
+    ##########################
+    
+    print('\n','-'*60)
+    print (f' Evaluando {nombre_modelo}')
+    print('-'*60)
+    # Error cuadrático medio
+    # predecimos test acorde al modelo
+    modelo.fit(x, y)
+    prediccion = modelo.predict(x)
+    prediccion_test = modelo.predict(x_test)
+
+    Etest=r2_score(y_test, prediccion_test)
+    Ein=r2_score(y, prediccion)
+    print("E_in en entrenamiento: ",Ein)
+    print("E_test en validación: ",Etest)
+    return  modelo.feature_importances_
+'''      
+def GraficaError(num_estimadores, resultados):
+    plt.plot( num_estimadores, resultados['mean_test_score'], c = 'red', label='R2') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
+    plt.legend();
+    plt.title("Evolución del coeficiente R2 para n_estimators")
+    plt.xlabel('n_estimators')
+    plt.ylabel('R2')
+    plt.figure()
+    plt.show()
+'''
+
+'''
+def GraficaRegularizacion(E_in,E_val,alpha):
+    plt.plot( alpha, E_in, c = 'orange', label='E_in') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
+    plt.plot( alpha, E_val, c = 'blue', label='E_val') #Para representarlo, despejo x2 de la ecuación y represento la función resultante en 2D
+    plt.legend();
+    plt.title("Influencia de la regularización en train y validación")
+    plt.xlabel('alpha')
+    plt.ylabel('R2')
+    plt.figure()
+    plt.show()
+'''
+    
+# fin-modelos
 #########################################################################################################################################################
 #########################################################################################################################################################
 #########################################################################################################################################################
@@ -681,8 +756,14 @@ def Evaluacion_test_modelos_lineales( modelo, x, y, x_test, y_test, nombre_model
 #########################################################################################################################################################
 
 
-  
+
+#################################################
+# Lineal SVM
+###################################################
+print('#################################################')
 Parada('Modelo: Regresión lineal con SVM')
+print('#################################################')
+
 #################################################################
 ###################### Modelos a usar ###########################
 print('Esta parte tiene un costo computacional elevado y ha sido comentada')
@@ -735,3 +816,367 @@ modelo=LinearSVR(epsilon=0.03, C=0.1,random_state=0, max_iter=15000)
 
 x_test_polinomios=TransformacionPolinomica(2,x_test)
 Evaluacion_test_modelos_lineales( modelo, x_entrenamiento, y_train, x_test_polinomios, y_test,'SVM aplicado a Regresión')
+
+
+
+
+#################################################
+# Random forest 
+###################################################
+
+#Modelo: Random Forest aplicado a Regresión
+#Grid de Parámetros
+''' DESCOMENTAR
+Parada('\nRandom Forest aplicado a Regresión \n')
+
+num_estimadores =[]
+for i in range(50,350,50):
+    num_estimadores.append(i)
+    
+parametros = {
+     'max_features' :['sqrt'],
+    'n_estimators' : num_estimadores
+    }
+
+
+modelo=RandomForestRegressor(random_state=0)
+
+MuestraResultadosVC(modelo,parametros, x_train, y_train)
+
+'''# DESCOMENTAR
+#------------------- Ajuste con outliers --------------------------------
+'''# DESCOMENTAR
+Parada('Ajustamos ahora con Outliers')
+  
+
+
+resultados=MuestraResultadosVC(modelo,parametros, x_train_outliers_normalizado, y_train_con_outliers)
+
+#En esta gráfica vemos que el coeficiente R^2 es creciente
+GraficaError(num_estimadores,resultados)
+
+num_estimadores =[]
+for i in range(200,325,25):
+    num_estimadores.append(i)
+    
+parametros = {
+     'max_features' :['sqrt'],
+    'n_estimators' : num_estimadores
+    }
+
+resultados=MuestraResultadosVC(modelo,parametros, x_train_outliers_normalizado, y_train_con_outliers)
+
+Parada()
+
+#En esta gráfica vemos que el coeficiente R^2 parece alcanzar el máximo entre 260-290 estimadores
+GraficaError(num_estimadores, resultados, 'n_estimators')
+
+Parada('Ahora outliers normalizados')
+
+num_estimadores =[]
+for i in range(260,295,5):
+    num_estimadores.append(i)
+    
+parametros = {
+     'max_features' :['sqrt'],
+    'n_estimators' : num_estimadores
+    }
+
+resultados=MuestraResultadosVC(modelo,parametros, x_train_outliers_normalizado, y_train_con_outliers)
+
+Parada()
+#En esta gráfica vemos que el coeficiente R^2 es creciente
+GraficaError(num_estimadores, resultados, 'n_estimators')
+Parada()
+
+num_estimadores =[]
+for i in range(280,292,2):
+    num_estimadores.append(i)
+    
+parametros = {
+     'max_features' :['sqrt'],
+    'n_estimators' : num_estimadores
+    }
+
+resultados=MuestraResultadosVC(modelo,parametros, x_train_outliers_normalizado, y_train_con_outliers)
+
+Parada()
+#En esta gráfica vemos que el coeficiente R^2 es creciente
+GraficaError(num_estimadores, resultados, 'n_estimators')
+
+Parada()
+print("\n Veamos si hay Sobrajuste: ")
+
+x_entrenamiento, x_validacion, y_entrenamiento, y_validacion=train_test_split(
+    x_train_outliers_normalizado, y_train_con_outliers,
+    test_size= 0.2,
+    shuffle = True, 
+    random_state=1)
+
+
+modelo=RandomForestRegressor(max_features='sqrt',n_estimators=290,random_state=0)
+Evaluacion_validacion(modelo,x_entrenamiento,y_entrenamiento,x_validacion,y_validacion,'Random Forest')
+
+Parada()
+
+print("\n\nTratamos de reducir el sobreajuste: ")
+
+alpha =np.arange(0.0, 0.001, 0.0001).tolist()
+  
+
+for i in alpha:
+    print("\n alpha=",i)
+    modelo=RandomForestRegressor(max_features='sqrt',n_estimators=290,ccp_alpha=i, random_state=0)
+    Evaluacion_validacion(modelo,x_entrenamiento,y_entrenamiento,x_validacion,y_validacion,'Random Forest')
+
+
+E_in=[0.9531783709010848,0.8776642587554613,0.822134867592024,0.7791942044642272,0.7480678478671681,0.7251329558659247,0.7070096167353577,0.6934033698830031, 0.6827806319388955,0.6733809257943127]
+E_val=[0.6851165863802047,0.6828587662709389,0.6783327423991174,0.6700327984832091,0.6619702856867934,0.6550114680674126,0.6489352273229924,0.6426441681200656,0.6374229820589261,0.6321236114445636]
+
+GraficaRegularizacion(E_in,E_val,alpha)
+Parada()
+'''# DESCOMENTAR
+#El modelo final será con alpha=0.0006
+MODELO_RANDOM_FOREST=RandomForestRegressor(max_features='sqrt',n_estimators=290,ccp_alpha=0.0006, random_state=0)
+'''# DESCOMENTAR
+importancias=Evaluacion_test_randomforest(MODELO_RANDOM_FOREST,x_train_outliers_normalizado,y_train_con_outliers,x_test_outliers_normalizado,y_test,'Random Forest')
+#Evaluacion(MODELO_RANDOM_FOREST,x_train_con_outliers,y_train_con_outliers,x_test,y_test,'Random Forest')
+
+caracteristicas =np.arange(1, 101, 1).tolist()
+plt.bar(caracteristicas,importancias, color='darkblue', align='center')
+plt.title ('Importancia de cada característica')
+plt.show()
+
+# Cogemos los elementos más importantes del árbol del decisión 
+importancias=importancias.tolist()
+maximo_1=max(importancias)
+max_index1=importancias.index(maximo_1)
+importancias.pop(max_index1)
+
+maximo_2=max(importancias)
+max_index2=importancias.index(maximo_2)
+importancias.pop(max_index2)
+
+maximo_3=max(importancias)
+max_index3=importancias.index(maximo_3)
+importancias.pop(max_index3)
+
+print("Los atributos más importantes son: ", max_index1, max_index2, max_index3)
+
+
+Parada('Estudio preliminar de los parámetros (tarda un minuto aprox)')
+# Parámetros por defecto
+MLP_1 = MLPRegressor(
+    random_state=1,
+    max_iter=500,
+    shuffle = True,
+    activation = 'logistic',
+
+)
+
+tam_capas = [50, 75, 100]
+
+parametros = {
+    'hidden_layer_sizes' : [ (i,j) for i in tam_capas for j in tam_capas],
+    'solver':['sgd', 'adam']
+}
+
+ 
+resultados_1 = MuestraResultadosVC(
+    MLP_1,
+    parametros,
+    x_train,
+    y_train
+    
+)
+
+
+## De este experimento los mejores resultados han sido
+#Mejores parámetros:  {'hidden_layer_sizes': (100, 50), 'solver': 'adam'}
+#Con una $R^2$ de:  0.6205065254947334   
+
+
+# -----------------------------------------------------
+
+# Procedamos ahora a hacer una exploración del learning rate y la regularización
+
+Parada('Estudio sobre el learning rate (tarda medio minuto aprox)')
+# Parámetros por defecto
+MLP_2 = MLPRegressor(
+    random_state=1,
+    max_iter=200,
+    shuffle = True,
+    early_stopping = False,
+    activation = 'logistic',
+    hidden_layer_sizes = (100, 50),
+    solver = 'adam'
+    
+)
+
+# valores con que experimentar 
+learnig_rates = [0.0001, 0.001, 0.01, 0.1, 1]
+
+parametros = {
+    'learning_rate_init':learnig_rates
+
+}
+
+
+resultados_2 = MuestraResultadosVC(
+    MLP_2,
+    parametros,
+    x_train,
+    y_train
+    
+)
+
+
+Parada( 'Muestro gráfico ')
+print('Gráfico que muestra la evolución del coefiente de terminación frente la tasa de aprendizaje')
+GraficaError(learnig_rates, resultados_2, 'tasa de aprendizaje')
+
+
+## Experimento sobre el método de adaptación
+
+Parada ('Experimento variando regularización')
+
+
+# valores con que experimentar
+MLP_3 = MLPRegressor(
+    random_state=1,
+    max_iter=200,
+    shuffle = True,
+    early_stopping = False,
+    activation = 'logistic',
+    hidden_layer_sizes = (100, 50),
+    solver = 'adam'
+    
+)
+regularizacion = [0,0.0001,0.001,0.01, 1]
+
+parametros_3 = {
+    'alpha': regularizacion
+
+}
+
+resultados_3 = MuestraResultadosVC(
+    MLP_3,
+    parametros_3,
+    x_train,
+    y_train
+    
+)
+
+Parada( 'Muestro gráfico comparación regularización ')
+print('Grafica que compara la evolución de R^2 frente a la regularización')
+GraficaError( regularizacion, resultados_3, 'regularización')
+
+# -------------------------------------
+
+    
+Parada('Experimento de número de iteraciones ')
+
+
+# valores con que experimentar
+MLP_4 = MLPRegressor(
+    random_state=1,
+    shuffle = True,
+    early_stopping = False,
+    activation = 'logistic',
+    hidden_layer_sizes = (100, 50),
+    solver = 'adam',
+    alpha = 0.01
+    
+)
+maximas_iteraciones = [10, 50, 100, 200, 350]
+
+parametros_4 = {
+    'max_iter':maximas_iteraciones
+
+}
+   
+resultados_4 = MuestraResultadosVC(
+    MLP_4,
+    parametros_4,
+    x_train,
+    y_train
+    
+)
+'''# DESCOMENTAR
+''' Comento porque tiene poco sentido mostrar esta gráfica
+Parada( 'Muestro gráfico comparación número de iteraciones')
+GraficaError( maximas_iteraciones, resultados_4)
+'''
+'''# DESCOMENTAR
+# ------- tras todo esto el modelo seleccionado por cross validation es ---
+
+MLP_mejor = MLPRegressor(
+    random_state=1,
+    shuffle = True,
+    early_stopping = False,
+    activation = 'logistic',
+    hidden_layer_sizes = (100, 50),
+    solver = 'adam',
+    alpha = 0.01,
+    learning_rate_init = 0.001
+    
+)
+
+# añadir función de evaluación de errores   
+
+Parada( 'MEJOR RESULTADO PARA MLP')
+'''# DESCOMENTAR
+print('''Los hiperparámetros seleccionados han sido:  
+    random_state=1,
+    shuffle = True,
+    early_stopping = False,
+    activation = 'logistic',
+    hidden_layer_sizes = (100, 50),
+    solver = 'adam',
+    alpha = 0.01,
+    learning_rate_init = 0.001
+    
+''')
+
+
+'''# DESCOMENTAR
+ConclusionesFinales( MLP_mejor,
+                     x_train,
+                     y_train,
+                     x_test,
+                     y_test,
+                     mostrar_coeficientes = False  #importante, porque AdaBoos no tiene esta función y daría error
+                    )
+
+
+
+
+
+###########################################################
+# DUMMY
+###########################################################
+
+Parada('Evaluación de croos validation para dummy')
+dummy_regr = DummyRegressor()
+parametros = {'strategy':['mean', 'median']}
+
+MuestraResultadosVC( dummy_regr, parametros, x_train, y_train)
+
+'''# DESCOMENTAR
+
+''' Tarda un par de mínutos en ejecutarse, ya que calculamos 
+el EOUT a partir de leaveCincuentaOut (una versión de leaveOneOut pero con 50)
+Parada('Evaluación del modelo final seleccionado')
+print('\n Evaluación final del del modelo ingenuo ')
+ConclusionesFinales( MODELO_RANDOM_FOREST,
+                     x_train, y_train,
+                     x_test, y_test,
+                     mostrar_coeficientes = False,
+                     leave_one_out = True
+                    )
+
+'''
+#######################################################
+#
+                
+                
