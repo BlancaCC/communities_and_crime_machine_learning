@@ -1,4 +1,13 @@
- # Random Forest
+---
+header-includes: 
+- \usepackage{tikz,pgfplots}   
+- \usepackage[spanish,es-tabla]{babel}
+- \usepackage[utf8]{inputenc}
+- \usepackage{graphicx}
+- \usepackage{subcaption}
+---
+
+# Random Forest
 
 En el modelo Random Forest se construyen construye n_estimators árboles de decisión usando la totalidad de la muestra para la construcción de cada uno, pero sólo un subconjunto de las caracterı́sticas para disminuir la correlación entre los árboles. Vamos a usar, tal y como se vió en teoría,  la raı́z cuadrada del número de caracterı́sticas, ya que la propia función de sklearn lo recomienda y porque empíricamente se sabe que esa cantidad da unos buenos resultados. Después de esto, se hace la media de los árboles obtenidos para evitar el overfitting y reducir la variabilidad.
 
@@ -26,6 +35,7 @@ Mejores parámetros:  {'max_features': 'sqrt', 'n_estimators': 300}
 Con una $R^2$ de:  0.6317213836930409 
 
 Table: Tabla de parámetros usados
+
 |Parámetros | $R^2$ medio | Desviación tipica $R^2$| Ranking | tiempo medio ajuste |      
 |---|---|---|---|---|    
 | max_features sqrt n_estimators 300 | 0.6317 | 0.0129 | 1 | 2.2426|     
@@ -47,6 +57,7 @@ Mejores parámetros:  {'max_features': 'sqrt', 'n_estimators': 275}
 Con una $R^2$ de:  0.6748757239989758 
 
 Table: Tabla de parámetros usados
+
 |Parámetros | $R^2$ medio | Desviación tipica $R^2$| Ranking | tiempo medio ajuste |      
 |---|---|---|---|---|    
 | max_features sqrt n_estimators 275 | 0.6749 | 0.0197 | 1 | 2.6051|     
@@ -70,6 +81,7 @@ Mejores parámetros:  {'max_features': 'sqrt', 'n_estimators': 290}
 Con una $R^2$ de:  0.6748993027349519 
 
 Table: Tabla de parámetros usados
+
 |Parámetros | $R^2$ medio | Desviación tipica $R^2$| Ranking | tiempo medio ajuste |      
 |---|---|---|---|---|    
 | max_features sqrt n_estimators 290 | 0.6749 | 0.0198 | 1 | 1.9222|     
@@ -94,6 +106,7 @@ Mejores parámetros:  {'max_features': 'sqrt', 'n_estimators': 290}
 Con una $R^2$ de:  0.6748993027349519 
 
 Table: Tabla de parámetros usados
+
 |Parámetros | $R^2$ medio | Desviación tipica $R^2$| Ranking | tiempo medio ajuste |      
 |---|---|---|---|---|    
 | max_features sqrt n_estimators 290 | 0.6749 | 0.0198 | 1 | 1.9802|     
